@@ -28,7 +28,7 @@ from typing import Dict
 from typing import Tuple
 from typing import List
 from typing import Iterable
-from typing import Any
+from typing import Type
 import os
 import sys
 import unicodedata
@@ -72,16 +72,9 @@ MAX_WORDS = 100
 # pylint: disable=attribute-defined-outside-init
 class Dictionary():
     '''A class to hold a hunspell dictionary'''
-    # As soon as it is OK ot require Python >= 3.7, use these nicer type hints:
-    #
-    # _instances: Dict[Tuple[Type['Dictionary'], str], 'Dictionary'] = {}
-    #
-    # def __new__(cls: Type['Dictionary'], name: str = 'en_US') -> 'Dictionary':
-    #
-    # openSUSE Leap 15.4 still has only Python 3.6.
-    _instances: Dict[Tuple[Any, str], Any] = {}
+    _instances: Dict[Tuple[Type['Dictionary'], str], 'Dictionary'] = {}
 
-    def __new__(cls: Any, name: str = 'en_US') -> Any:
+    def __new__(cls: Type['Dictionary'], name: str = 'en_US') -> 'Dictionary':
         '''Caching instances of this class and reuse previously created instances'''
         key = (cls, name)
         if key not in cls._instances:

@@ -75,6 +75,7 @@ except ImportError:
     # Use standard “re” module as a fallback:
     import re
     USING_REGEX = False
+from re import Match  # pylint: disable=wrong-import-order  # for type checking
 
 distro: Optional[ModuleType]
 try:
@@ -3547,10 +3548,7 @@ def normalize_nfc_and_composition_exclusions(text: str) -> str:
         return ''
     text = unicodedata.normalize('NFC', text)
 
-    # openSUSE Leap 15.4 still has only Python 3.6.
-    # Cannot use the nicer type hint
-    # def replace_exclusions(match: re.Match[str]) -> str:
-    def replace_exclusions(match: Any) -> str:
+    def replace_exclusions(match: Match[str]) -> str:
         return COMPOSITION_EXCLUSIONS[match.group(0)]
 
     return COMPOSITION_EXCLUSION_REGEX.sub(replace_exclusions, text)
