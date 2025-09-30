@@ -29,13 +29,8 @@ from typing import Set
 from typing import Union
 from typing import Any
 from typing import cast
+from typing import Literal
 import sys
-# pylint: disable=wrong-import-position
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-# pylint: enable=wrong-import-position
 import os
 import re
 import json
