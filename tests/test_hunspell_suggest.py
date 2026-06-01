@@ -170,6 +170,9 @@ class HunspellSuggestTestCase(unittest.TestCase):
     @unittest.skipUnless(
         itb_util_core.get_hunspell_dictionary_wordlist('it_IT')[0],
         'Skipping because no Italian hunspell dictionary could be found.')
+    @unittest.skipIf(
+        itb_util_core.distro_id() in ('debian', 'ubuntu'),
+        'Skipping due to different Italian dictionary in Debian/Ubuntu.')
     def test_it_IT(self) -> None:
         h = hunspell_suggest.Hunspell(['it_IT'])
         self.assertEqual(
