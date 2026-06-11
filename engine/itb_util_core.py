@@ -3199,55 +3199,11 @@ def estimate_left_steps(text: str, caret: int) -> int:
     The exact number of `Left` steps needed to reach the caret position may
     depend on the editor application used.
 
-    Examples:
+    Basic examples that work with and without `regex`:
 
     >>> estimate_left_steps('ü', 1)
     0
     >>> estimate_left_steps('ü', 0)
-    1
-    >>> estimate_left_steps('u\u0308', 0) # U+0308 COMBINING DIAERESIS
-    1
-    >>> estimate_left_steps('u\u0308', 1) # U+0308 COMBINING DIAERESIS
-    1
-    >>> estimate_left_steps('u\u0308', 2) # U+0308 COMBINING DIAERESIS
-    0
-    >>> estimate_left_steps('gru\u0308n', 3)
-    2
-    >>> estimate_left_steps('क्फ़्र', 6)
-    0
-    >>> estimate_left_steps('क्फ़्र', 5)
-    1
-    >>> estimate_left_steps('क्फ़्र', 3)
-    1
-
-    # In reality the following needs 2 steps in gedit, gnome-text-editor, emacs, ...
-    >>> estimate_left_steps('क्फ़्र', 0)
-    1
-    >>> estimate_left_steps('ক্ষ্র', 5)
-    0
-    >>> estimate_left_steps('ক্ষ্র', 4)
-    1
-    >>> estimate_left_steps('ক্ষ্র', 1)
-    1
-    >>> estimate_left_steps('ক্ষ্র', 0)
-    1
-    >>> estimate_left_steps('🇩🇪', 2)
-    0
-    >>> estimate_left_steps('🇩🇪', 1)
-    1
-    >>> estimate_left_steps('🇩🇪', 0)
-    1
-    >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 7)
-    0
-    >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 6)
-    1
-    >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 1)
-    1
-    >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 0)
-    1
-    >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', -1) # invalid caret!
-    0
-    >>> estimate_left_steps('🇩🇪🏴󠁧󠁢󠁳󠁣󠁴󠁿', 2)
     1
     '''
     if not text or caret < 0:
@@ -3265,6 +3221,58 @@ def estimate_left_steps(text: str, caret: int) -> int:
         if match.end() > caret:
             steps += 1
     return steps
+
+
+if USING_REGEX:
+    def _doctest_estimate_left_steps_regex() -> None:
+        '''
+        Examples that need `regex`:
+
+        >>> estimate_left_steps('u\u0308', 0) # U+0308 COMBINING DIAERESIS
+        1
+        >>> estimate_left_steps('u\u0308', 1) # U+0308 COMBINING DIAERESIS
+        1
+        >>> estimate_left_steps('u\u0308', 2) # U+0308 COMBINING DIAERESIS
+        0
+        >>> estimate_left_steps('gru\u0308n', 3)
+        2
+        >>> estimate_left_steps('क्फ़्र', 6)
+        0
+        >>> estimate_left_steps('क्फ़्र', 5)
+        1
+        >>> estimate_left_steps('क्फ़्र', 3)
+        1
+
+        # In reality the following needs 2 steps in gedit, gnome-text-editor, emacs, ...
+        >>> estimate_left_steps('क्फ़्र', 0)
+        1
+        >>> estimate_left_steps('ক্ষ্র', 5)
+        0
+        >>> estimate_left_steps('ক্ষ্র', 4)
+        1
+        >>> estimate_left_steps('ক্ষ্র', 1)
+        1
+        >>> estimate_left_steps('ক্ষ্র', 0)
+        1
+        >>> estimate_left_steps('🇩🇪', 2)
+        0
+        >>> estimate_left_steps('🇩🇪', 1)
+        1
+        >>> estimate_left_steps('🇩🇪', 0)
+        1
+        >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 7)
+        0
+        >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 6)
+        1
+        >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 1)
+        1
+        >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', 0)
+        1
+        >>> estimate_left_steps('🏴󠁧󠁢󠁳󠁣󠁴󠁿', -1) # invalid caret!
+        0
+        >>> estimate_left_steps('🇩🇪🏴󠁧󠁢󠁳󠁣󠁴󠁿', 2)
+        1
+        '''
 
 # Mapping of Unicode ordinals to Unicode ordinals, strings, or None.
 # Unmapped characters are left untouched. Characters mapped to None
