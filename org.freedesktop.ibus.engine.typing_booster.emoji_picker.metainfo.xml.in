@@ -47,7 +47,7 @@
         <p>Bug fixes and enhancements</p>
         <ul>
           <li>
-             More fine grained control of whether digits can be used
+             More fine-grained control of whether digits can be used
              in the preedit (Resolves: github-issues:905)
           </li>
           <li>
