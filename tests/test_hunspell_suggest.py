@@ -178,10 +178,10 @@ class HunspellSuggestTestCase(unittest.TestCase):
         self.assertEqual(
             h.suggest('principianti'),
             [('principianti', 0),
-             ('principiati', -2),
-             ('principiante', -3),
-             ('principiarti', -4),
-             ('principiasti', -5)])
+             ('principiati', -1),
+             ('principiante', -2),
+             ('principiarti', -3),
+             ('principiasti', -4)])
 
     @unittest.skipUnless(
         itb_util_core.get_hunspell_dictionary_wordlist('es_ES')[0],
@@ -191,12 +191,12 @@ class HunspellSuggestTestCase(unittest.TestCase):
         self.assertEqual(
             h.suggest('teneis'),
             [('tene\u0301is', 0),
-             ('teneos', -2),
-             ('tenes', -3),
-             ('tenis', -4),
-             ('tienes', -5),
-             ('te neis', -6),
-             ('te-neis', -7)])
+             ('teneos', -1),
+             ('tenes', -2),
+             ('tenis', -3),
+             ('tienes', -4),
+             ('te neis', -5),
+             ('te-neis', -6)])
         self.assertEqual(
             h.suggest('tenéis')[0],
             ('tene\u0301is', 0))

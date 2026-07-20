@@ -656,11 +656,11 @@ class Hunspell:
 
         >>> h = Hunspell(['it_IT'])
         >>> h.suggest('principianti')
-        [('principianti', 0), ('principiati', -2), ('principiante', -3), ('principiarti', -4), ('principiasti', -5)]
+        [('principianti', 0), ('principiati', -1), ('principiante', -2), ('principiarti', -3), ('principiasti', -4)]
 
         >>> h = Hunspell(['es_ES'])
         >>> h.suggest('teneis')
-        [('tenéis', 0), ('teneos', -2), ('tenes', -3), ('tenis', -4), ('tienes', -5), ('te neis', -6), ('te-neis', -7)]
+        [('tenéis', 0), ('teneos', -1), ('tenes', -2), ('tenis', -3), ('tienes', -4), ('te neis', -5), ('te-neis', -6)]
 
         >>> h.suggest('tenéis')[0]
         ('tenéis', 0)
@@ -762,7 +762,11 @@ class Hunspell:
                         for x in
                         dictionary.spellcheck_suggest(input_phrase)
                     )
-                    for index, suggestion in enumerate(extra_suggestions):
+                    # Number only suggestions which are actually added. The Hunspell
+                    # suggestion list may contain the input word itself, depending on the
+                    # Hunspell version, and that must not affect the ranking of corrections.
+                    spellcheck_value = 0
+                    for suggestion in extra_suggestions:
                         if suggestion not in suggested_words[name]:
                             if (dictionary.word_pairs
                                 and
@@ -773,7 +777,8 @@ class Hunspell:
                                 == input_phrase_no_accents):
                                 suggested_words[name][suggestion] = 0
                             else:
-                                suggested_words[name][suggestion] = -(index + 1)
+                                spellcheck_value -= 1
+                                suggested_words[name][suggestion] = spellcheck_value
         suggested_words_total = itb_util_core.merge_dicts_max(
             *suggested_words.values())
         sorted_suggestions = sorted(
