@@ -31,7 +31,6 @@ from typing import Optional
 from typing import Iterable
 from typing import Callable
 from typing import TextIO
-from typing import cast
 import os
 import sys
 import re
@@ -454,8 +453,7 @@ def _match_classic(label: str, match_string: str) -> float:
     label_words = set(label.split())
     label_no_spaces = label.replace(' ', '')
     # Sort longest words first.
-    word_list: List[str] = cast(
-        List[str], sorted(match_string.split(), key=len, reverse=True))
+    word_list: List[str] = sorted(match_string.split(), key=len, reverse=True)
     word_set = set(word_list)
     # Exact set match (highest priority)
     # For example 'black cat' counts as an exact match for 'cat black'.
