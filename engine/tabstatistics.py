@@ -25,7 +25,7 @@ import argparse
 import os
 import sqlite3
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import itb_util_core
 
@@ -150,7 +150,7 @@ class DbContents:
         self._user_db_file = os.path.expanduser(user_db_file)
         self._database = sqlite3.connect(self._user_db_file)
         # id, input_phrase, phrase, p_phrase, pp_phrase, user_freq, timestamp
-        self._original_rows: List[Tuple[int, str, str, str, str, int, float]] = []
+        self._original_rows: list[tuple[int, str, str, str, str, int, float]] = []
         self._original_rows = self._database.execute('SELECT * FROM phrases;').fetchall()
         self.sort_by_time_ascending()
         self._time_oldest = 0.0
@@ -166,7 +166,7 @@ class DbContents:
               f'{self._max_rows}')
         index = len(self._original_rows)
         number_delete_above_max = 0
-        rows_kept: List[Tuple[int, str, str, str, str, int, float]] = []
+        rows_kept: list[tuple[int, str, str, str, str, int, float]] = []
         for row in self._original_rows:
             user_freq = row[5]
             if (index > self._max_rows
@@ -248,12 +248,12 @@ class DbContents:
 
     def print_savings(self, period: str = 'none') -> None:
         '''Print the keystrokes saved by period'''
-        length_typed: Dict[int, int] = {}
-        length_committed: Dict[int, int] = {}
-        percent_saved: Dict[int, float] = {}
-        length_typed_b: Dict[int, int] = {}
-        length_committed_b: Dict[int, int] = {}
-        percent_saved_b: Dict[int, float] = {}
+        length_typed: dict[int, int] = {}
+        length_committed: dict[int, int] = {}
+        percent_saved: dict[int, float] = {}
+        length_typed_b: dict[int, int] = {}
+        length_committed_b: dict[int, int] = {}
+        percent_saved_b: dict[int, float] = {}
         period_lengths_in_seconds = {
             'none': 0,
             'second': 1,
@@ -340,7 +340,7 @@ class DbContents:
 
     def print_user_freq_distribution(self) -> None:
         '''Print the distribution of user frequencies'''
-        user_freqs: Dict[int, int] = {}
+        user_freqs: dict[int, int] = {}
         for row in self._original_rows:
             user_freq = row[5]
             if user_freq in user_freqs:
@@ -352,17 +352,17 @@ class DbContents:
 
     @classmethod
     def _print_row(cls,
-                   row: Tuple[int, str, str, str, str, int, float],
+                   row: tuple[int, str, str, str, str, int, float],
                    prefix: str = '') -> None:
         print(f'{prefix}'
               f'{row[0]:7} ' # id
               f'{row[5]:7} ' # user_freq
               f'{time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(row[6]))}' # timestamp
               f'{str(row[6]-int(row[6]))[1:8]} ' # fractional seconds part of timestamp
-              f'{repr(row[4])} ' # pp_phrase
-              f'{repr(row[3])} ' # p_phrase
-              f'{repr(row[1])} ' # input_phrase
-              f'{repr(row[2])} ' # phrase
+              f'{row[4]!r} ' # pp_phrase
+              f'{row[3]!r} ' # p_phrase
+              f'{row[1]!r} ' # input_phrase
+              f'{row[2]!r} ' # phrase
               )
 
     def dump(self, sort: str = 'user_freq') -> None:

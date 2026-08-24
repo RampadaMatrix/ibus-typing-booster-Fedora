@@ -147,10 +147,8 @@ class SoundObject:
             if pygame_mixer.get_init():
                 pygame_mixer.music.load(self._path_to_sound_file)
                 return 'pygame'
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'pygame: cannot load sound file %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('pygame: cannot load sound file')
         return ''
 
     def _init_pyaudio(self) -> str:
@@ -169,10 +167,8 @@ class SoundObject:
             LOGGER.info('portaudio version = %s',
                         pyaudio.get_portaudio_version_text())
             return 'pyaudio'
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'pyaudio: cannot init wave object %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('pyaudio: cannot init wave object')
         return ''
 
     def _init_simpleaudio(self) -> str:
@@ -188,10 +184,8 @@ class SoundObject:
             self._simpleaudio_wave_o = (
                 simpleaudio.WaveObject.from_wave_file(self._path_to_sound_file))
             return 'simpleaudio'
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Initializing error sound object failed: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Initializing error sound object failed')
         return ''
 
     def _init_aplay(self) -> str:
@@ -242,10 +236,8 @@ class SoundObject:
                     break
                 stream.write(data)
                 data = self._wav_file.readframes(chunk_size)
-            except (SystemError, OSError) as error:
-                LOGGER.exception(
-                    'Unexpected error playing wave object %s: %s',
-                    error.__class__.__name__, error)
+            except (SystemError, OSError):
+                LOGGER.exception('Unexpected error playing wave object')
                 LOGGER.error('If you see the '
                              '"SystemError: PY_SSIZE_T_CLEAN macro '
                              'must be defined for \'#\' formats" '
@@ -293,10 +285,8 @@ class SoundObject:
             return
         try:
             self._simpleaudio_play_o = self._simpleaudio_wave_o.play()
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Initializing error sound object failed: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Initializing error sound object failed')
 
     def _is_playing_simpleaudio(self) -> bool:
         if not self._simpleaudio_play_o:
@@ -350,34 +340,26 @@ class SoundObject:
                 encoding=None,
                 errors=None,
                 text=None)
-        except (OSError, ValueError) as error:
-            LOGGER.exception(
-                'cannot start aplay process %s: %s',
-                error.__class__.__name__, error)
+        except (OSError, ValueError):
+            LOGGER.exception('cannot start aplay process')
             return
         try:
             self._aplay_process.communicate(input=self._aplay_stdin,
                                             timeout=1000)
-        except subprocess.TimeoutExpired as error:
-            LOGGER.exception(
-                'timeout piping sound file into aplay process%s: %s',
-                error.__class__.__name__, error)
+        except subprocess.TimeoutExpired:
+            LOGGER.exception('timeout piping sound file into aplay process')
             self._aplay_process.kill()
             return
         try:
             self._aplay_process.terminate()
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'cannot terminate aplay process %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('cannot terminate aplay process')
             try:
                 LOGGER.info('Trying to kill aplay process')
                 self._aplay_process.kill()
                 LOGGER.info('aplay process killed')
-            except Exception as error2: # pylint: disable=broad-except
-                LOGGER.exception(
-                    'cannot kill aplay process%s: %s',
-                    error.__class__.__name__, error2)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('cannot kill aplay process')
 
     def _play_aplay(self) -> None:
         self._play_aplay_thread = threading.Thread(
@@ -398,17 +380,13 @@ class SoundObject:
             and self._aplay_process.poll() is None):
             try:
                 self._aplay_process.terminate()
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception(
-                'cannot terminate aplay process %s: %s',
-                error.__class__.__name__, error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('cannot terminate aplay process')
                 try:
                     LOGGER.info('Trying to kill aplay process')
                     self._aplay_process.kill()
-                except Exception as error2: # pylint: disable=broad-except
-                    LOGGER.exception(
-                        'cannot kill aplay process%s: %s',
-                        error.__class__.__name__, error2)
+                except Exception: # pylint: disable=broad-except
+                    LOGGER.exception('cannot kill aplay process')
         if self._play_aplay_thread.is_alive():
             self._play_aplay_thread.join(timeout=0.1)
             if self._play_aplay_thread.is_alive():

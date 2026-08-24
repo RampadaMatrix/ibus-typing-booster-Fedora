@@ -35,9 +35,7 @@ from enum import Enum, auto
 from typing import (
     Any,
     Callable,
-    List,
     Optional,
-    Tuple,
     cast,
     overload,
 )
@@ -160,7 +158,7 @@ def clear_children(widget: Gtk.Widget) -> None:
     # Fallback — nothing to do
     return
 
-def children_of(widget: Gtk.Widget) -> List[Gtk.Widget]:
+def children_of(widget: Gtk.Widget) -> list[Gtk.Widget]:
     '''Return iterable of logical children for Gtk3/Gtk4 (internal helper).'''
     if hasattr(widget, 'get_children'): # Gtk3 containers
         try:
@@ -334,18 +332,18 @@ def set_entry_text_preserve_cursor(entry: Gtk.Entry, new_text: str) -> None:
         return
     entry.set_position(-1)
 
-def get_window_size(window: Gtk.Window) -> Tuple[int, int]:
+def get_window_size(window: Gtk.Window) -> tuple[int, int]:
     '''Get the size of a window (Gtk 3/4 compatible)'''
     if GTK_MAJOR >=4:
         return (window.get_width(), window.get_height())
-    return cast(Tuple[int, int], window.get_size())
+    return cast(tuple[int, int], window.get_size())
 
 def get_treeview_context(
         treeview: Gtk.TreeView,
         x: int,
         y: int,
         keyboard_tip: bool,
-    ) -> Tuple[bool, Optional[Gtk.TreeModel], Optional[Gtk.TreePath], Optional[Gtk.TreeIter]]:
+    ) -> tuple[bool, Optional[Gtk.TreeModel], Optional[Gtk.TreePath], Optional[Gtk.TreeIter]]:
     '''
     Unified GTK3/Gtk4 wrapper around TreeView.get_tooltip_context()
 
@@ -522,7 +520,7 @@ def _add_details_section(parent_box: Gtk.Box, details_text: str) -> None:
     add_child(scroll, label)
     add_child(expander, scroll)
 
-def get_preferred_width(widget: Gtk.Widget) -> Tuple[int, int]:
+def get_preferred_width(widget: Gtk.Widget) -> tuple[int, int]:
     '''
     Return (minimum, natural) width of a widget in a Gtk3/Gtk4 compatible way.
     '''
@@ -532,7 +530,7 @@ def get_preferred_width(widget: Gtk.Widget) -> Tuple[int, int]:
     return min_size, nat_size
 
 
-def get_preferred_height(widget: Gtk.Widget) -> Tuple[int, int]:
+def get_preferred_height(widget: Gtk.Widget) -> tuple[int, int]:
     '''
     Return (minimum, natural) height of a widget in a Gtk3/Gtk4 compatible way.
     '''
@@ -697,13 +695,13 @@ def clickable_event_box_compat_get_gtk_label(
         return event_box.get_child()
     return event_box.get_first_child()
 
-def flowbox_get_children(flowbox: Gtk.FlowBox) -> List[Gtk.FlowBoxChild]:
+def flowbox_get_children(flowbox: Gtk.FlowBox) -> list[Gtk.FlowBoxChild]:
     '''Returns a list of flowbox children'''
     if hasattr(flowbox, "get_children"):  # GTK3
         return list(flowbox.get_children())
     return list(children_of(flowbox))
 
-def emoji_flowbox_get_labels(flowbox: Gtk.FlowBox) -> List[Gtk.Label]:
+def emoji_flowbox_get_labels(flowbox: Gtk.FlowBox) -> list[Gtk.Label]:
     '''Returns a list of (emoji)-labels in a Gtk.FlowBox as used in emoji_picker.py
     Compatible with both Gtk3 and Gtk4.
     '''
@@ -749,9 +747,9 @@ class ClickableEventBoxCompat(Gtk.Box if GTK_MAJOR >= 4 else Gtk.EventBox): # ty
             longpress.connect('pressed', self._on_longpress_gtk4)
             self.add_controller(longpress) # pylint: disable=no-member
         # Unified signal slots
-        self._click_handlers: List[Tuple[ClickCallback, Tuple[Any, ...]]] = []
-        self._release_handlers: List[Tuple[ReleaseCallback, Tuple[Any, ...]]] = []
-        self._longpress_handlers: List[Tuple[LongPressCallback, Tuple[Any, ...]]] = []
+        self._click_handlers: list[tuple[ClickCallback, tuple[Any, ...]]] = []
+        self._release_handlers: list[tuple[ReleaseCallback, tuple[Any, ...]]] = []
+        self._longpress_handlers: list[tuple[LongPressCallback, tuple[Any, ...]]] = []
         # Internal long-press tracking (Gtk3)
         self._gtk3_longpress_timer: Optional[int] = None
         self._gtk3_button_down: bool = False

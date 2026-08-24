@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-#
 # ibus-typing-booster - A completion input method for IBus
 #
 # Copyright (c) 2025 Mike FABIAN <mfabian@redhat.com>
@@ -35,12 +33,8 @@ entire process uses a consistent GI setup.
 This module must be imported **before** any other module imports
 Gtk or Gdk.
 '''
-from typing import (
-    Tuple,
-    Dict,
-)
-import sys
 import os
+import sys
 import traceback
 from gi import require_version
 
@@ -58,7 +52,7 @@ if 'gi.repository.Gdk' in sys.modules:
         'Ensure all imports of Gtk/Gdk go through itb_gtk. '
         'Import stack trace:\n' + ''.join(traceback.format_stack()))
 
-def _os_release() -> Dict[str, str]:
+def _os_release() -> dict[str, str]:
     '''Return ID, VERSION_ID, ID_LIKE from /etc/os-release.'''
     result = {}
     try:
@@ -67,7 +61,7 @@ def _os_release() -> Dict[str, str]:
                 if '=' in line:
                     k, v = line.strip().split('=', 1)
                     result[k] = v.strip('"')
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
         pass
     return result
 
@@ -102,7 +96,7 @@ def _is_ubuntu_2204_or_older() -> bool:
         return False
     try:
         major, minor = map(int, version.split('.')[:2])
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
         return False
     return (major, minor) <= (22, 4)
 
@@ -111,7 +105,7 @@ def _gtk_available(major: int) -> bool:
     try:
         require_version('Gtk', '4.0' if major == 4 else '3.0')
         return True
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
         return False
 
 # Determine desired Gtk major version
@@ -149,7 +143,7 @@ from gi.repository import Gtk, Gdk  # type: ignore[attr-defined]  # ty: ignore[u
 GTK_MAJOR: int = Gtk.get_major_version()
 GTK_MINOR: int = Gtk.get_minor_version()
 GTK_MICRO: int = Gtk.get_micro_version()
-GTK_VERSION: Tuple[int, int, int] = (GTK_MAJOR, GTK_MINOR, GTK_MICRO)
+GTK_VERSION: tuple[int, int, int] = (GTK_MAJOR, GTK_MINOR, GTK_MICRO)
 # pylint: enable=no-value-for-parameter
 
 # Re-export for external use

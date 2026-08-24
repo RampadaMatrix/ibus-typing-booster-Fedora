@@ -41,12 +41,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     Optional,
-    Set,
-    Tuple,
     Union,
 )
 
@@ -74,7 +70,7 @@ if TYPE_CHECKING:
 try:
     import itb_ollama as _itb_ollama
     itb_ollama = _itb_ollama
-except Exception as error:  # pylint: disable=broad-exception-caught  # intentionally broad: disable feature on any failure
+except Exception as error:  # pylint: disable=broad-exception-caught  # noqa: BLE001  # intentionally broad: disable feature on any failure
     itb_ollama = None
     _itb_ollama_import_error = error
 else:
@@ -157,8 +153,8 @@ IBUS_VERSION = (IBus.MAJOR_VERSION, IBus.MINOR_VERSION, IBus.MICRO_VERSION)
 
 def log_glib_callback_exception(
         func: Callable[..., Any],
-        args: Tuple[Any, ...],
-        kwargs: Dict[str, Any]) -> None:
+        args: tuple[Any, ...],
+        kwargs: dict[str, Any]) -> None:
     '''Log exceptions in GLib callbacks'''
     exc_type, exc_value, exc_traceback = sys.exc_info()
     assert exc_type is not None
@@ -178,7 +174,7 @@ def _wrap_glib_callback(func: Callable[..., Any]) -> Callable[..., Any]:
     def safe_func(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             log_glib_callback_exception(func, args, kwargs)
             # Returning False stops the GLib source from being called again
             return False
@@ -625,10 +621,8 @@ class TypingBoosterEngine(IBus.Engine):
                 self._m17n_ime_name = match.group('name')
                 schema_path = ('/org/freedesktop/ibus/engine/tb/'
                                f'{self._m17n_ime_lang}/{self._m17n_ime_name}/')
-            except ValueError as error:
-                LOGGER.exception(
-                    'Failed to match engine_name %s: %s: %s',
-                    engine_name, error.__class__.__name__, error)
+            except ValueError:
+                LOGGER.exception('Failed to match engine_name %s', engine_name)
                 raise # Re-raise the original exception
         self._gsettings = Gio.Settings(
             schema='org.freedesktop.ibus.engine.typing-booster',
@@ -649,25 +643,25 @@ class TypingBoosterEngine(IBus.Engine):
         self._setup_process: Optional[subprocess.Popen[Any]] = None
         self._settings_dict = self._init_settings_dict()
 
-        self._prop_dict: Dict[str, IBus.Property] = {}
-        self._sub_props_dict: Dict[str, IBus.PropList] = {}
+        self._prop_dict: dict[str, IBus.Property] = {}
+        self._sub_props_dict: dict[str, IBus.PropList] = {}
         self.main_prop_list: IBus.PropList = IBus.PropList()
-        self.emoji_prediction_mode_menu: Dict[str, Any] = {}
-        self.emoji_prediction_mode_properties: Dict[str, Any]= {}
-        self.off_the_record_mode_menu: Dict[str, Any] = {}
-        self.off_the_record_mode_properties: Dict[str, Any] = {}
-        self.input_mode_menu: Dict[str, Any] = {}
-        self.input_mode_properties: Dict[str, Any] = {}
-        self.dictionary_menu: Dict[str, Any] = {}
-        self.dictionary_properties: Dict[str, Any] = {}
+        self.emoji_prediction_mode_menu: dict[str, Any] = {}
+        self.emoji_prediction_mode_properties: dict[str, Any]= {}
+        self.off_the_record_mode_menu: dict[str, Any] = {}
+        self.off_the_record_mode_properties: dict[str, Any] = {}
+        self.input_mode_menu: dict[str, Any] = {}
+        self.input_mode_properties: dict[str, Any] = {}
+        self.dictionary_menu: dict[str, Any] = {}
+        self.dictionary_properties: dict[str, Any] = {}
         self.dictionary_sub_properties_prop_list: IBus.PropList = IBus.PropList()
-        self.preedit_ime_menu: Dict[str, Any] = {}
-        self.preedit_ime_properties: Dict[str, Any] = {}
+        self.preedit_ime_menu: dict[str, Any] = {}
+        self.preedit_ime_properties: dict[str, Any] = {}
         self.preedit_ime_sub_properties_prop_list: IBus.PropList = IBus.PropList()
 
         self._client_info: ClientInfo = ClientInfo()
 
-        self._current_imes: List[str] = []
+        self._current_imes: list[str] = []
 
         self._ai_chat_enable: bool = self._settings_dict[
             'aichatenable']['user']
@@ -680,9 +674,9 @@ class TypingBoosterEngine(IBus.Engine):
         self._ollama_max_context: int = self._settings_dict[
             'ollamamaxcontext']['user']
         self._ollama_response_style: Literal['preedit', 'aux'] = 'aux'
-        self._ollama_messages: List[Dict[str, str]] = []
+        self._ollama_messages: list[dict[str, str]] = []
         self._ollama_selection_text = ''
-        self._ollama_prompt: Dict[str, str] = {}
+        self._ollama_prompt: dict[str, str] = {}
         self._ollama_response = ''
         self._ollama_chat_query_thread: Optional[threading.Thread] = None
         self._ollama_chat_query_error = False
@@ -882,7 +876,7 @@ class TypingBoosterEngine(IBus.Engine):
             'labeldictionary']['user']
 
         self._label_dictionary_string: str = ''
-        self._label_dictionary_dict: Dict[str, str] = {}
+        self._label_dictionary_dict: dict[str, str] = {}
         self.set_label_dictionary_string(
             self._settings_dict['labeldictionarystring']['user'],
             update_gsettings=False)
@@ -901,17 +895,17 @@ class TypingBoosterEngine(IBus.Engine):
         self._google_application_credentials: str = self._settings_dict[
             'googleapplicationcredentials']['user']
 
-        self._keybindings: Dict[str, List[str]] = {}
+        self._keybindings: dict[str, list[str]] = {}
         self._hotkeys: Optional[itb_util_core.HotKeys] = None
-        self._keys_used_in_keybindings: Set[str] = set()
+        self._keys_used_in_keybindings: set[str] = set()
         self.set_keybindings(
             self._settings_dict['keybindings']['user'], update_gsettings=False)
 
-        self._autosettings: List[Tuple[str, str, str]] = []
+        self._autosettings: list[tuple[str, str, str]] = []
         self.set_autosettings(
             self._settings_dict['autosettings']['user'],
             update_gsettings=False)
-        self._autosettings_revert: Dict[str, Any] = {}
+        self._autosettings_revert: dict[str, Any] = {}
 
         self._remember_input_mode: bool = self._settings_dict[
             'rememberinputmode']['user']
@@ -928,7 +922,7 @@ class TypingBoosterEngine(IBus.Engine):
             self._settings_dict['errorsoundfile']['user'],
             update_gsettings=False)
 
-        self._dictionary_names: List[str] = []
+        self._dictionary_names: list[str] = []
         dictionary = self._settings_dict['dictionary']['user']
         self._dictionary_names = itb_util_core.dictionaries_str_to_list(dictionary)
         if ','.join(self._dictionary_names) != dictionary:
@@ -939,7 +933,7 @@ class TypingBoosterEngine(IBus.Engine):
                 GLib.Variant.new_string(','.join(self._dictionary_names)))
         self.database.hunspell_obj.set_dictionary_names(
             self._dictionary_names[:])
-        self._dictionary_flags: Dict[str, str] = itb_util_core.get_flags(
+        self._dictionary_flags: dict[str, str] = itb_util_core.get_flags(
             self._dictionary_names)
 
         if  self._emoji_predictions:
@@ -971,21 +965,21 @@ class TypingBoosterEngine(IBus.Engine):
         self._translated_key_state = 0
         self._m17n_trans_parts: m17n_translit.TransliterationParts = (
             m17n_translit.TransliterationParts())
-        self._typed_compose_sequence: List[int] = [] # A list of key values
-        self._typed_string: List[str] = [] # A list of msymbols
+        self._typed_compose_sequence: list[int] = [] # A list of key values
+        self._typed_string: list[str] = [] # A list of msymbols
         self._typed_string_cursor = 0
         self._p_phrase = ''
         self._pp_phrase = ''
         self._ppp_phrase = ''
         self._new_sentence = False
-        self._transliterated_strings: Dict[str, str] = {}
-        self._transliterated_strings_before_compose: Dict[str, str] = {}
+        self._transliterated_strings: dict[str, str] = {}
+        self._transliterated_strings_before_compose: dict[str, str] = {}
         self._transliterated_strings_compose_part = ''
-        self._transliterators: Dict[str, m17n_translit.Transliterator] = {}
+        self._transliterators: dict[str, m17n_translit.Transliterator] = {}
         self._init_transliterators()
-        self._candidates: List[itb_util_core.PredictionCandidate] = []
+        self._candidates: list[itb_util_core.PredictionCandidate] = []
         # a copy of self._candidates in case mode 'orig':
-        self._candidates_case_mode_orig: List[itb_util_core.PredictionCandidate] = []
+        self._candidates_case_mode_orig: list[itb_util_core.PredictionCandidate] = []
         self._current_case_mode = 'orig'
         # 'orig': candidates have original case.
         # 'capitalize': candidates have been converted to the first character
@@ -1235,7 +1229,7 @@ class TypingBoosterEngine(IBus.Engine):
         self._surrounding_text.event.clear()
         self.get_surrounding_text() # trigger surrounding text update
 
-    def _init_settings_dict(self) -> Dict[str, Any]:
+    def _init_settings_dict(self) -> dict[str, Any]:
         '''Initialize a dictionary with the default and user settings for all
         settings keys.
 
@@ -1251,8 +1245,8 @@ class TypingBoosterEngine(IBus.Engine):
         Keeping a copy of the default settings in the settings dictionary
         makes it easy to revert some or all settings to the defaults.
         '''
-        settings_dict: Dict[str, Any] = {}
-        set_get_functions: Dict[str, Dict[str, Any]] = {
+        settings_dict: dict[str, Any] = {}
+        set_get_functions: dict[str, dict[str, Any]] = {
             'inputmethod': {
                 'set': self.set_current_imes,
                 'get': self.get_current_imes},
@@ -1628,7 +1622,7 @@ class TypingBoosterEngine(IBus.Engine):
         self.update_auxiliary_text(
             IBus.Text.new_from_string(''), False)
 
-    def _insert_string_at_cursor(self, string_to_insert: List[str]) -> None:
+    def _insert_string_at_cursor(self, string_to_insert: list[str]) -> None:
         '''Insert typed string at cursor position'''
         if self._debug_level > 1:
             LOGGER.debug('string_to_insert=%s', string_to_insert)
@@ -1746,7 +1740,7 @@ class TypingBoosterEngine(IBus.Engine):
             spell_checking: bool = False) -> None:
         '''append candidate to lookup_table'''
         phrase = itb_util_core.normalize_nfc_and_composition_exclusions(phrase)
-        dictionary_matches: List[str] = []
+        dictionary_matches: list[str] = []
         if phrase and itb_util_core.is_invisible(phrase):
             if len(phrase) == 1:
                 if comment == '':
@@ -1910,13 +1904,13 @@ class TypingBoosterEngine(IBus.Engine):
             # empty input does not pointlessly try to find candidates.
             return
         self._candidates = []
-        phrase_frequencies: Dict[str, float] = {}
-        phrase_candidates: List[itb_util_core.PredictionCandidate] = []
+        phrase_frequencies: dict[str, float] = {}
+        phrase_candidates: list[itb_util_core.PredictionCandidate] = []
         self._lookup_table.enabled_by_min_char_complete = False
         if self._word_predictions or self._temporary_word_predictions:
             for ime in self._current_imes:
                 if self._transliterated_strings[ime]:
-                    candidates: List[itb_util_core.PredictionCandidate] = []
+                    candidates: list[itb_util_core.PredictionCandidate] = []
                     prefix_length = 0
                     prefix = ''
                     stripped_transliterated_string = (
@@ -1965,24 +1959,20 @@ class TypingBoosterEngine(IBus.Engine):
                                 stripped_transliterated_string,
                                 p_phrase=self._p_phrase,
                                 pp_phrase=self._pp_phrase)
-                        except Exception as error: # pylint: disable=broad-except
-                            LOGGER.exception(
-                                'Exception when calling select_words: %s: %s',
-                                error.__class__.__name__, error)
+                        except Exception: # pylint: disable=broad-except
+                            LOGGER.exception('Exception when calling select_words')
                     if candidates and prefix:
                         candidates = [
                             itb_util_core.PredictionCandidate(
                                 phrase=prefix+x.phrase,
                                 user_freq=x.user_freq)
                             for x in candidates]
-                    shortcut_candidates: List[itb_util_core.PredictionCandidate] = []
+                    shortcut_candidates: list[itb_util_core.PredictionCandidate] = []
                     try:
                         shortcut_candidates = self.database.select_shortcuts(
                             self._transliterated_strings[ime])
-                    except Exception as error: # pylint: disable=broad-except
-                        LOGGER.exception(
-                            'Exception when calling select_shortcuts: %s: %s',
-                            error.__class__.__name__, error)
+                    except Exception: # pylint: disable=broad-except
+                        LOGGER.exception('Exception when calling select_shortcuts')
                     for cand in candidates + shortcut_candidates:
                         if cand.phrase in phrase_frequencies:
                             phrase_frequencies[cand.phrase] = max(
@@ -2035,7 +2025,7 @@ class TypingBoosterEngine(IBus.Engine):
                     languages=self._dictionary_names,
                     unicode_data_all=self._unicode_data_all,
                     variation_selector=self._emoji_style)
-            emoji_scores: Dict[str, Tuple[float, str]] = {}
+            emoji_scores: dict[str, tuple[float, str]] = {}
             emoji_max_score: float = 0.0
             for ime in self._current_imes:
                 if (self._transliterated_strings[ime]
@@ -2052,7 +2042,7 @@ class TypingBoosterEngine(IBus.Engine):
                         if (ecand.phrase not in emoji_scores
                                 or ecand.user_freq > emoji_scores[ecand.phrase][0]):
                             emoji_scores[ecand.phrase] = (ecand.user_freq, ecand.comment)
-            phrase_candidates_emoji_name: List[itb_util_core.PredictionCandidate] = []
+            phrase_candidates_emoji_name: list[itb_util_core.PredictionCandidate] = []
             for cand in phrase_candidates:
                 # If this candidate is duplicated in the emoji candidates,
                 # don’t use this as a text candidate but increase the score
@@ -2074,7 +2064,7 @@ class TypingBoosterEngine(IBus.Engine):
                             comment=self.emoji_matcher.name(cand.phrase),
                             from_user_db=cand.user_freq > 0,
                             spell_checking=cand.user_freq < 0))
-            emoji_candidates: List[itb_util_core.PredictionCandidate] = []
+            emoji_candidates: list[itb_util_core.PredictionCandidate] = []
             for (key, value) in sorted(
                     emoji_scores.items(),
                     key=lambda x: (
@@ -2149,33 +2139,25 @@ class TypingBoosterEngine(IBus.Engine):
         if not self._lookup_table.is_cursor_visible():
             self._lookup_table.set_cursor_visible(True)
             return True
-        if self._lookup_table.cursor_down():
-            return True
-        return False
+        return self._lookup_table.cursor_down()
 
     def _arrow_up(self) -> bool:
         '''Process Arrow Up Key Event
         Move Lookup Table cursor up'''
         self._lookup_table.set_cursor_visible(True)
-        if self._lookup_table.cursor_up():
-            return True
-        return False
+        return self._lookup_table.cursor_up()
 
     def _page_down(self) -> bool:
         '''Process Page Down Key Event
         Move Lookup Table page down'''
         self._lookup_table.set_cursor_visible(True)
-        if self._lookup_table.page_down():
-            return True
-        return False
+        return self._lookup_table.page_down()
 
     def _page_up(self) -> bool:
         '''Process Page Up Key Event
         move Lookup Table page up'''
         self._lookup_table.set_cursor_visible(True)
-        if self._lookup_table.page_up():
-            return True
-        return False
+        return self._lookup_table.page_up()
 
     def _get_lookup_table_current_page(self) -> int:
         '''
@@ -2183,7 +2165,7 @@ class TypingBoosterEngine(IBus.Engine):
 
         The first page has index 0.
         '''
-        page, dummy_pos_in_page = divmod(
+        page, _dummy_pos_in_page = divmod(
             self._lookup_table.get_cursor_pos(),
             self._lookup_table.get_page_size())
         return int(page)
@@ -2277,7 +2259,7 @@ class TypingBoosterEngine(IBus.Engine):
                              case_mode_orig_phrase)
                 self.database.remove_phrase(
                     phrase=case_mode_orig_phrase)
-        for _, case_mode_value in self._case_modes.items():
+        for case_mode_value in self._case_modes.values():
             # delete all case modes of the displayed candidate:
             phrase = case_mode_value['function'](displayed_phrase)
             # If the candidate to be removed from the user database starts
@@ -2387,7 +2369,7 @@ class TypingBoosterEngine(IBus.Engine):
                 'self._transliterated_strings=%s',
                 self._transliterated_strings)
 
-    def get_current_imes(self) -> List[str]:
+    def get_current_imes(self) -> list[str]:
         '''Get current list of input methods
 
         It is important to return a copy, we do not want to change
@@ -2397,11 +2379,11 @@ class TypingBoosterEngine(IBus.Engine):
 
     def set_current_imes(
             self,
-            imes: Union[str, List[str], Any],
+            imes: Union[str, list[str], Any],
             update_gsettings: bool = True) -> None:
         '''Set current list of input methods
 
-        :param imes: List of input methods
+        :param imes: list of input methods
                      If a single string is used, it should contain
                      the names of the input methods separated by commas.
                      If the string is empty, the default input
@@ -2440,11 +2422,11 @@ class TypingBoosterEngine(IBus.Engine):
 
     def set_dictionary_names(
             self,
-            dictionary_names: Union[str, List[str], Any],
+            dictionary_names: Union[str, list[str], Any],
             update_gsettings: bool = True) -> None:
         '''Set current dictionary names
 
-        :param dictionary_names: List of names of dictionaries to use
+        :param dictionary_names: list of names of dictionaries to use
                                  If a single string is used, it should contain
                                  the names of the dictionaries separated
                                  by commas.
@@ -2485,7 +2467,7 @@ class TypingBoosterEngine(IBus.Engine):
                 'dictionary',
                 GLib.Variant.new_string(','.join(dictionary_names)))
 
-    def get_dictionary_names(self) -> List[str]:
+    def get_dictionary_names(self) -> list[str]:
         '''Get current list of dictionary names'''
         # It is important to return a copy, we do not want to change
         # the private member variable directly.
@@ -2493,7 +2475,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def set_autosettings(
             self,
-            autosettings: Union[List[Tuple[str, str, str]], Any],
+            autosettings: Union[list[tuple[str, str, str]], Any],
             update_gsettings: bool = True) -> None:
         '''Set the current automatic settings
 
@@ -2521,7 +2503,7 @@ class TypingBoosterEngine(IBus.Engine):
                 'autosettings',
                 variant_array)
 
-    def get_autosettings(self) -> List[Tuple[str, str, str]]:
+    def get_autosettings(self) -> list[tuple[str, str, str]]:
         '''Get current autosettings
 
         Returns the list of settings automatically applied when
@@ -2533,7 +2515,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def set_keybindings(
             self,
-            keybindings: Union[Dict[str, List[str]], Any],
+            keybindings: Union[dict[str, list[str]], Any],
             update_gsettings: bool = True) -> None:
         '''Set current key bindings
 
@@ -2600,7 +2582,7 @@ class TypingBoosterEngine(IBus.Engine):
                 'keybindings',
                 variant_dict.end())
 
-    def get_keybindings(self) -> Dict[str, List[str]]:
+    def get_keybindings(self) -> dict[str, list[str]]:
         '''Get current key bindings
 
         Python dictionary of key bindings for commands
@@ -2673,7 +2655,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def _init_or_update_property_menu_dictionary(
             self,
-            menu: Dict[str, Any],
+            menu: dict[str, Any],
             current_mode: int = 0) -> None:
         '''
         Initialize or update the ibus property menu for
@@ -2718,7 +2700,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def _init_or_update_property_menu_preedit_ime(
             self,
-            menu: Dict[str, Any],
+            menu: dict[str, Any],
             current_mode: int = 0) -> None:
         '''
         Initialize or update the ibus property menu for
@@ -2763,7 +2745,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def _init_or_update_sub_properties_dictionary(
             self,
-            modes: Dict[str, Any],
+            modes: dict[str, Any],
             current_mode: int = 0) -> None:
         '''
         Initialize or update the sub-properties of the property menu
@@ -2810,7 +2792,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def _init_or_update_sub_properties_preedit_ime(
             self,
-            modes: Dict[str, Any],
+            modes: dict[str, Any],
             current_mode: int = 0) -> None:
         '''
         Initialize or update the sub-properties of the property menu
@@ -2857,7 +2839,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def _init_or_update_property_menu(
             self,
-            menu: Dict[str, Any],
+            menu: dict[str, Any],
             current_mode: int = 0) -> None:
         '''
         Initialize or update a ibus property menu
@@ -2915,7 +2897,7 @@ class TypingBoosterEngine(IBus.Engine):
     def _init_or_update_sub_properties(
             self,
             menu_key: str,
-            modes: Dict[str, Any],
+            modes: dict[str, Any],
             current_mode: int = 0) -> None:
         '''
         Initialize or update the sub-properties of a property menu entry.
@@ -3121,10 +3103,8 @@ class TypingBoosterEngine(IBus.Engine):
         try:
             self._setup_process = subprocess.Popen( # pylint: disable=consider-using-with
                 cmd)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Exception when starting setup tools: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Exception when starting setup tools')
             self._setup_process = None
 
     def _is_setup_running(self) -> bool:
@@ -3843,10 +3823,8 @@ class TypingBoosterEngine(IBus.Engine):
                 for hyponym in itb_nltk.hyponyms(phrase, keep_original=False):
                     related_candidates.append(itb_util_core.PredictionCandidate(
                         phrase=hyponym, user_freq=0, comment='[hyponym]'))
-            except LookupError as error:
-                LOGGER.exception(
-                    'Exception when trying to use nltk: %s: %s',
-                     error.__class__.__name__, error)
+            except LookupError:
+                LOGGER.exception('Exception when trying to use nltk')
         if self._debug_level > 1:
             LOGGER.debug(
                 'related_candidates of “%s” = %s\n',
@@ -3941,7 +3919,7 @@ class TypingBoosterEngine(IBus.Engine):
         self._lookup_table.set_cursor_visible(cursor_visible)
         return True
 
-    def _has_transliteration(self, msymbol_list: List[str]) -> bool:
+    def _has_transliteration(self, msymbol_list: list[str]) -> bool:
         '''Check whether the current input (list of msymbols) has a
         (non-trivial, i.e. not transliterating to itself)
         transliteration in any of the current input methods.
@@ -4447,7 +4425,7 @@ class TypingBoosterEngine(IBus.Engine):
                         self.database.hunspell_obj.spellcheck_single_dictionary(
                         (self._p_phrase, self._pp_phrase, self._ppp_phrase))))
                 if matched_french_spacing_dictionaries:
-                    language_code = list(matched_french_spacing_dictionaries)[0]
+                    language_code = next(iter(matched_french_spacing_dictionaries))
         if self._debug_level > 1:
             LOGGER.debug('language_code=%r', language_code)
         chars_dict = itb_util_core.FIX_WHITESPACE_CHARACTERS.get(
@@ -6191,10 +6169,8 @@ class TypingBoosterEngine(IBus.Engine):
                 self._label_dictionary_dict = ast.literal_eval(label_string)
                 if not isinstance(self._label_dictionary_dict, dict):
                     self._label_dictionary_dict = {}
-            except (SyntaxError, ValueError) as error:
-                LOGGER.exception(
-                    'Cannot parse label_string as dict: %s: %s',
-                    error.__class__.__name__, error)
+            except (SyntaxError, ValueError):
+                LOGGER.exception('Cannot parse label_string as dict')
         if self._debug_level > 1:
             LOGGER.debug('self._label_dictionary_dict=%s',
                          repr(self._label_dictionary_dict))
@@ -6918,10 +6894,8 @@ class TypingBoosterEngine(IBus.Engine):
                 keymap, repr(itb_util_core.AVAILABLE_IBUS_KEYMAPS))
         try:
             return IBus.Keymap(keymap)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.error(
-                'Exception in IBus.Keymap("%s"): %s: %s. Returning None.',
-                keymap, error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Exception in IBus.Keymap("%s") Returning None.', keymap)
             return None
 
     def set_ibus_keymap(
@@ -7304,10 +7278,8 @@ class TypingBoosterEngine(IBus.Engine):
             self._google_application_credentials)
         try:
             client = speech.SpeechClient()
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Exception when intializing Google speech-to-text: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Exception when intializing Google speech-to-text')
             self._speech_recognition_error(
                 _('Failed to init Google speech-to-text. See debug.log.'))
             return
@@ -7413,9 +7385,8 @@ class TypingBoosterEngine(IBus.Engine):
                         True)
                     if result.is_final:
                         break
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception('Google speech-to-text error: %s: %s',
-                                 error.__class__.__name__, error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Google speech-to-text error')
                 self._speech_recognition_error(
                     _('Google speech-to-text error. See debug.log.'))
                 return
@@ -8057,9 +8028,8 @@ class TypingBoosterEngine(IBus.Engine):
                         stdin=devnull,
                         # keep running, even when Typing Booster exits:
                         start_new_session=True)
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception(
-                    'Exception when calling %r: %s', command, error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Exception when calling %r', command)
             return
         GLib.idle_add(self._ai_chat_get_prompt)
 
@@ -8192,7 +8162,7 @@ class TypingBoosterEngine(IBus.Engine):
 
     def _ollama_chat_query_thread_function(
             self,
-            messages: List[Dict[str, str]],
+            messages: list[dict[str, str]],
             stop_event: threading.Event) -> None:
         '''Thread to stream an ollama chat response'''
         if self._debug_level > 1:
@@ -8223,7 +8193,7 @@ class TypingBoosterEngine(IBus.Engine):
             self._ollama_response = self._ollama_response.strip()
             GLib.idle_add(self._ollama_chat_query_update_response)
             GLib.idle_add(self._ollama_chat_query_finalize_chat)
-        except Exception as error: # pylint: disable=broad-except
+        except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
             LOGGER.error('Error in ollama chat stream: %s', error)
             GLib.idle_add(self._ollama_chat_query_handle_error, str(error))
 
@@ -9044,7 +9014,7 @@ class TypingBoosterEngine(IBus.Engine):
     def _handle_hotkeys(
             self,
             key: itb_util_core.KeyEvent,
-            commands: Iterable[str] = ()) -> Tuple[bool, bool]:
+            commands: Iterable[str] = ()) -> tuple[bool, bool]:
         '''Handle hotkey commands
 
         :return: A tuple of too boolean values (match, return_value)
@@ -9341,9 +9311,8 @@ class TypingBoosterEngine(IBus.Engine):
         if self._error_sound and self._error_sound_object:
             try:
                 self._error_sound_object.play()
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception('Playing error sound failed: %s: %s',
-                                 error.__class__.__name__, error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Playing error sound failed')
 
     def _handle_m17n_candidates(self, key: itb_util_core.KeyEvent) -> bool:
         if self._debug_level > 1:
@@ -10653,7 +10622,7 @@ class TypingBoosterEngine(IBus.Engine):
             # a commit in m17n. Other commit trigger keys cannot do
             # anything to change the `ja-anthy` transliteration
             # either.
-            if not self._current_imes[0] == 'ja-anthy':
+            if self._current_imes[0] != 'ja-anthy':
                 final_msymbol = key.msymbol
                 if key.msymbol == 'BackSpace' and self._typed_string_cursor == 0:
                     # If BackSpace is typed at the beginning of the
@@ -11114,7 +11083,7 @@ class TypingBoosterEngine(IBus.Engine):
             self._revert_autosettings()
         if not self._client_info.client:
             return
-        autosettings_apply: Dict[str, Any] = {}
+        autosettings_apply: dict[str, Any] = {}
         for (setting, value, regexp) in self._autosettings:
             if (not regexp
                 or setting not in self._settings_dict
@@ -11140,20 +11109,14 @@ class TypingBoosterEngine(IBus.Engine):
             elif isinstance(current_value, int):
                 try:
                     new_value = int(value)
-                except ValueError as error:
-                    LOGGER.exception(
-                        'Exception converting autosettings value to integer: '
-                        '%s: %s',
-                        error.__class__.__name__, error)
+                except ValueError:
+                    LOGGER.exception('Exception converting autosettings value to integer')
                     continue
             elif isinstance(current_value, float):
                 try:
                     new_value = float(value)
-                except ValueError as error:
-                    LOGGER.exception(
-                        'Exception converting autosettings value to integer: '
-                        '%s: %s',
-                        error.__class__.__name__, error)
+                except ValueError:
+                    LOGGER.exception('Exception converting autosettings value to integer')
                     continue
             else:
                 continue

@@ -24,10 +24,6 @@ something with a display. Other utility functions which do not need
 that should go into the itb_util_core module.
 '''
 from typing import Any
-from typing import Tuple
-from typing import List
-from typing import Dict
-from typing import Set
 from typing import Optional
 # pylint: disable=wrong-import-position
 import sys
@@ -77,7 +73,7 @@ def N_(text: str) -> str: # pylint: disable=invalid-name
     '''
     return text
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def detect_terminal(input_purpose: int, im_client: str) -> bool:
     '''Detect whether the focus is on a terminal
 
@@ -434,7 +430,7 @@ class KeyvalsToKeycodes:
     key values depending on which modifier was pressed.
     '''
     def __init__(self) -> None:
-        self.keyvals_to_keycodes: Dict[int, List[int]] = {}
+        self.keyvals_to_keycodes: dict[int, list[int]] = {}
         display = Gdk.Display.get_default() # pylint: disable=no-value-for-parameter
         if not display:
             LOGGER.warning('Gdk.Display.get_default() returned %s', display)
@@ -445,8 +441,8 @@ class KeyvalsToKeycodes:
                 self._init_gtk4(display)
             else:
                 self._init_gtk3(display)
-        except Exception as error: # pylint: disable=broad-exception-caught
-            LOGGER.exception('Exception while initializing keymap: %s', error)
+        except Exception: # pylint: disable=broad-exception-caught
+            LOGGER.exception('Exception while initializing keymap')
             self._fallback_to_std_us_layout()
             return
         if not self.keyvals_to_keycodes:
@@ -473,11 +469,11 @@ class KeyvalsToKeycodes:
             result = display.map_keycode(keycode)
             try:
                 result = display.map_keycode(keycode)
-            except Exception as error: # pylint: disable=broad-exception-caught
+            except Exception as error: # pylint: disable=broad-exception-caught  # noqa: BLE001
                 LOGGER.debug('display.map_keycode(%d) raised: %s', keycode, error)
                 continue
-            keys_list: List[Gdk.KeymapKey] = []
-            keyvals_from_result: Optional[List[int]] = None
+            keys_list: list[Gdk.KeymapKey] = []
+            keyvals_from_result: Optional[list[int]] = None
             # upstream GTK4: result is a list of Gdk.KeymapKey-like objects
             if isinstance(result, list):
                 keys_list = result
@@ -505,7 +501,7 @@ class KeyvalsToKeycodes:
             if not keys_list and not keyvals_from_result:
                 continue
             # Base keyvals: try to get from objects or from keyvals_from_result
-            base_keyvals: Set[int] = set()
+            base_keyvals: set[int] = set()
             # If we have explicit keyvals provided by the compat tuple, use them
             if keyvals_from_result:
                 for kv in keyvals_from_result:
@@ -517,17 +513,17 @@ class KeyvalsToKeycodes:
                     if hasattr(k, 'keyval'):
                         try:
                             kv = int(getattr(k, 'keyval'))
-                        except Exception: # pylint: disable=broad-exception-caught
+                        except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                             continue
                         if kv:
                             base_keyvals.add(kv)
             if not base_keyvals: # Nothing meaningful for this keycode
                 continue
-            all_keyvals: Set[int] = set(base_keyvals)
+            all_keyvals: set[int] = set(base_keyvals)
             try:
                 ok, keyval, *_ = display.translate_keyboard_state(
                     keycode, Gdk.ModifierType.SHIFT_MASK, 0)
-            except Exception: # pylint: disable=broad-exception-caught
+            except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                 ok = False
                 keyval = 0
             if ok and keyval:
@@ -535,7 +531,7 @@ class KeyvalsToKeycodes:
             try:
                 ok, keyval, *_ = display.translate_keyboard_state(
                     keycode, altgr_mods, 0)
-            except Exception: # pylint: disable=broad-exception-caught
+            except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                 ok = False
                 keyval = 0
             if ok and keyval:
@@ -567,7 +563,7 @@ class KeyvalsToKeycodes:
                 keycode)
             if not success:
                 continue
-            all_keyvals: Set[int] = set(base_keyvals or [])
+            all_keyvals: set[int] = set(base_keyvals or [])
             (success,
              keyval,
              _effective_group,
@@ -604,11 +600,11 @@ class KeyvalsToKeycodes:
         }
         self.keyvals_to_keycodes.update(self._std_us_keyvals_to_keycodes)
 
-    def keyvals(self) -> Set[int]:
-        '''Returns the Set of keyvals available on the keyboard layout'''
+    def keyvals(self) -> set[int]:
+        '''Returns the set of keyvals available on the keyboard layout'''
         return set(self.keyvals_to_keycodes.keys())
 
-    def keycodes(self, keyval: int) -> List[int]:
+    def keycodes(self, keyval: int) -> list[int]:
         '''Returns a list of key codes of the hardware keys which can generate
         the given key value on the current keyboard layout.
 
@@ -633,7 +629,7 @@ class KeyvalsToKeycodes:
             return keycodes[0]
         return 0
 
-    def ibus_keycodes(self, keyval: int) -> List[int]:
+    def ibus_keycodes(self, keyval: int) -> list[int]:
         '''Returns a list of ibus key codes of the hardware keys which can
         generate the given key value on the current keyboard layout.
 
@@ -688,7 +684,7 @@ class ItbKeyInputDialog:
             title: str = _('Key input'),
             parent: Gtk.Window = None,
             parent_popover: Gtk.Popover = None) -> None:
-        self.e: Optional[Tuple[int, int]] = None
+        self.e: Optional[tuple[int, int]] = None
         self._response: Optional[Gtk.ResponseType] = None
         if parent_popover:
             parent_popover.popdown()
@@ -706,12 +702,11 @@ class ItbKeyInputDialog:
             buttons=Gtk.ButtonsType.NONE)
         self.dialog.add_button(_('Cancel'), Gtk.ResponseType.CANCEL)
         self.dialog.set_modal(True)
-        self.dialog.set_markup(
-            '<big><b>%s</b></big>' # pylint: disable=consider-using-f-string
-            # Translators: This is from the dialog to enter a key or a
-            # key combination to be used as a key binding for a
-            # command.
-            % _('Please press a key (or a key combination)'))
+        # Translators: This is from the dialog to enter a key or a
+        # key combination to be used as a key binding for a
+        # command.
+        text = _('Please press a key (or a key combination)')
+        self.dialog.set_markup(f'<big><b>{GLib.markup_escape_text(text)}</b></big>')
         self.dialog.format_secondary_text(
             # Translators: This is from the dialog to enter a key or a
             # key combination to be used as a key binding for a
@@ -755,12 +750,11 @@ class ItbKeyInputDialog:
         box.set_margin_end(12)
         self.dialog.set_child(box)
         title_label = Gtk.Label()
-        title_label.set_markup(
-            '<big><b>%s</b></big>'  # pylint: disable=consider-using-f-string
-            # Translators: This is from the dialog to enter a key or a
-            # key combination to be used as a key binding for a
-            # command.
-            %_('Please press a key (or a key combination)'))
+        # Translators: This is from the dialog to enter a key or a
+        # key combination to be used as a key binding for a
+        # command.
+        text = _('Please press a key (or a key combination)')
+        title_label.set_markup(f'<big><b>{GLib.markup_escape_text(text)}s</b></big>')
         title_label.set_xalign(0)
         box.append(title_label)
         sec_label = Gtk.Label(label=_(
@@ -795,7 +789,7 @@ class ItbKeyInputDialog:
             self._response = response_id
             try:
                 dialog.hide()
-            except Exception: # pylint: disable=broad-exception-caught
+            except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                 pass
 
         def on_cancel_clicked(_button: Gtk.Button) -> None:
@@ -803,7 +797,7 @@ class ItbKeyInputDialog:
             self._response = Gtk.ResponseType.CANCEL
             try:
                 self.dialog.hide()
-            except Exception: # pylint: disable=broad-exception-caught
+            except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                 pass
 
         cancel_button.connect('clicked', on_cancel_clicked)
@@ -833,7 +827,7 @@ class ItbKeyInputDialog:
         self._response = Gtk.ResponseType.OK
         try:
             self.dialog.hide()
-        except Exception: # pylint: disable=broad-exception-caught
+        except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
             pass
         return True
 
@@ -861,7 +855,7 @@ class ItbKeyInputDialog:
         '''Common to Gtk3 and Gtk4'''
         try:
             self.dialog.destroy()
-        except Exception: # pylint: disable=broad-exception-caught
+        except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
             pass
 
 class ItbAboutDialog(Gtk.AboutDialog): # type: ignore[misc]
@@ -887,7 +881,7 @@ class ItbAboutDialog(Gtk.AboutDialog): # type: ignore[misc]
             '🚀 ibus-typing-booster')
         self.set_version(
             f'ibus-typing-booster-{itb_version.get_version()}'
-            f', Gtk {".".join((str(i) for i in GTK_VERSION))}')
+            f', Gtk {".".join(str(i) for i in GTK_VERSION)}')
         self.set_comments(
             _('A completion input method to speedup typing.'))
         self.set_copyright(

@@ -26,7 +26,7 @@ import re
 import shutil
 import subprocess
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from gi import require_version
 
@@ -56,15 +56,6 @@ def _get_global_pango_layout() -> Pango.Layout:
     '''Create a reusable Pango.Layout, first call initializes'''
     return Pango.Layout(_get_global_pango_context())
 
-# @functools.cache is available only in Python >= 3.9.
-#
-# Python >= 3.9 is not available on RHEL8, not yet on openSUSE
-# Tumbleweed (2021-22-29), ...
-#
-# But @functools.lru_cache(maxsize=None) is the same and it is
-# available for Python >= 3.2, that means it should be available
-# everywhere.
-
 @functools.cache
 def get_font_file(family: str) -> str:
     '''Use Fontconfig to find the font file path for a given font family
@@ -91,15 +82,12 @@ def get_font_file(family: str) -> str:
                                          stderr=subprocess.STDOUT,
                                          encoding='utf-8')
         path = output.strip()
-    except FileNotFoundError as error:
-        LOGGER.warning('Exception when calling %s: %s: %s',
-                       fc_match_binary, error.__class__.__name__, error)
-    except subprocess.CalledProcessError as error:
-        LOGGER.warning('Exception when calling %s: %s: %s',
-                       fc_match_binary, error.__class__.__name__, error)
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.warning('Exception when calling %s: %s: %s',
-                       fc_match_binary, error.__class__.__name__, error)
+    except FileNotFoundError:
+        LOGGER.warning('fc-match not found: %s', fc_match_binary)
+    except subprocess.CalledProcessError:
+        LOGGER.warning('fc-match failed: %s', fc_match_binary)
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
+        LOGGER.warning('Unexpected exception when calling %s', fc_match_binary)
     return path
 
 @functools.cache
@@ -121,15 +109,12 @@ def get_font_lang(family: str) -> str:
                                          stderr=subprocess.STDOUT,
                                          encoding='utf-8')
         lang = output.strip()
-    except FileNotFoundError as error:
-        LOGGER.warning('Exception when calling %s: %s: %s',
-                       fc_match_binary, error.__class__.__name__, error)
-    except subprocess.CalledProcessError as error:
-        LOGGER.warning('Exception when calling %s: %s: %s',
-                       fc_match_binary, error.__class__.__name__, error)
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.warning('Exception when calling %s: %s: %s',
-                       fc_match_binary, error.__class__.__name__, error)
+    except FileNotFoundError:
+        LOGGER.warning('fc-match not found: %s', fc_match_binary)
+    except subprocess.CalledProcessError:
+        LOGGER.warning('fc-match failed: %s', fc_match_binary)
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
+        LOGGER.warning('Unexpected exception when calling %s', fc_match_binary)
     return lang
 
 @functools.cache
@@ -162,13 +147,13 @@ def get_font_version(font_file: str) -> str:
     except subprocess.CalledProcessError as error:
         LOGGER.warning('Exception when calling %s: %s: %s',
                        otfinfo_binary, error.__class__.__name__, error)
-    except Exception as error: # pylint: disable=broad-except
+    except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
         LOGGER.warning('Exception when calling %s: %s: %s',
                        otfinfo_binary, error.__class__.__name__, error)
     return version
 
 @functools.cache
-def get_font_tables(font_file: str) -> List[str]:
+def get_font_tables(font_file: str) -> list[str]:
     # pylint: disable=line-too-long
     '''Use otfinfo to get the OpenType tables in a font file
 
@@ -195,7 +180,7 @@ def get_font_tables(font_file: str) -> List[str]:
 
     '''
     # pylint: enable=line-too-long
-    tables: List[str] = []
+    tables: list[str] = []
     otfinfo_binary = shutil.which('otfinfo')
     if not otfinfo_binary:
         return tables
@@ -217,12 +202,12 @@ def get_font_tables(font_file: str) -> List[str]:
     except subprocess.CalledProcessError as error:
         LOGGER.warning('Exception when calling %s: %s: %s',
                        otfinfo_binary, error.__class__.__name__, error)
-    except Exception as error: # pylint: disable=broad-except
+    except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
         LOGGER.warning('Exception when calling %s: %s: %s',
                        otfinfo_binary, error.__class__.__name__, error)
     return tables
 
-def get_available_font_names() -> List[str]:
+def get_available_font_names() -> list[str]:
     # pylint: disable=line-too-long
     '''Return a list of the names of fonts available on the system
 
@@ -250,7 +235,7 @@ def get_available_font_names() -> List[str]:
     return sorted([family.get_name() for family in families])
 
 def get_fonts_used_for_text(
-        font: str, text: str, fallback: bool = True) -> List[Tuple[str, Dict[str, Any]]]:
+        font: str, text: str, fallback: bool = True) -> list[tuple[str, dict[str, Any]]]:
     # pylint: disable=line-too-long
     '''Return a list of fonts which were really used to render a text
 
@@ -387,7 +372,7 @@ def get_fonts_used_for_text(
     ['COLR']
     '''
     # pylint: enable=line-too-long
-    fonts_used: List[Tuple[str, Dict[str, Any]]]  = []
+    fonts_used: list[tuple[str, dict[str, Any]]]  = []
     if not _HAS_ATTR_FALLBACK:
         return [(text, {'font': 'unknown: Pango broken on this platform (RHEL8?)'})]
     text_utf8 = text.encode('UTF-8', errors='replace')

@@ -23,11 +23,7 @@ This module must not import Gtk or Gdk or require a display.
 '''
 from types import ModuleType
 from typing import Any
-from typing import Tuple
-from typing import List
-from typing import Dict
 from typing import DefaultDict
-from typing import Set
 from typing import Optional
 from typing import Union
 from typing import Iterable
@@ -115,7 +111,7 @@ except ImportError:
 
 pycountry: Optional[ModuleType]
 try:
-    import pycountry as _pycountry # type: ignore[import-not-found]  # ty: ignore[unresolved-import]
+    import pycountry as _pycountry  # type: ignore[import-not-found]  # ty: ignore[unresolved-import]
     pycountry = _pycountry
 except ImportError:
     pycountry = None
@@ -689,7 +685,7 @@ LOCALE_DEFAULTS = {
     'zu': {'inputmethods': ['NoIME'], 'dictionaries': ['zu_ZA', 'en_GB']},
 }
 
-def get_default_input_methods(locale_string: str) -> List[str]:
+def get_default_input_methods(locale_string: str) -> list[str]:
     '''
     Gets the default input methods for a locale
 
@@ -722,7 +718,7 @@ def get_default_input_methods(locale_string: str) -> List[str]:
             return LOCALE_DEFAULTS[lang]['inputmethods']
     return ['NoIME']
 
-def get_default_dictionaries(locale_string: str) -> List[str]:
+def get_default_dictionaries(locale_string: str) -> list[str]:
     '''
     Gets the default dictionaries for a locale
 
@@ -743,7 +739,7 @@ def get_default_dictionaries(locale_string: str) -> List[str]:
             return LOCALE_DEFAULTS[lang]['dictionaries']
     return ['en_US']
 
-def input_methods_str_to_list(imes_str: str) -> List[str]:
+def input_methods_str_to_list(imes_str: str) -> list[str]:
     '''Converts a list of input methods from a comma separated string
     to a list of strings.
 
@@ -791,7 +787,7 @@ def input_methods_str_to_list(imes_str: str) -> List[str]:
     '''
     if imes_str == '':
         return get_default_input_methods(get_effective_lc_ctype())
-    imes: List[str] = []
+    imes: list[str] = []
     for ime in  [re.sub(re.escape('noime'), 'NoIME', x.strip(),
                         flags=re.IGNORECASE)
                  for x in imes_str.split(',') if x.strip()]:
@@ -810,7 +806,7 @@ def input_methods_str_to_list(imes_str: str) -> List[str]:
         return imes
     return ['NoIME']
 
-def dictionaries_str_to_list(dictionaries_str: str) -> List[str]:
+def dictionaries_str_to_list(dictionaries_str: str) -> list[str]:
     # pylint: disable=line-too-long
     '''
     Converts a list of dictionaries from a comma separated string to
@@ -865,7 +861,7 @@ def dictionaries_str_to_list(dictionaries_str: str) -> List[str]:
     # pylint: enable=line-too-long
     if dictionaries_str == '':
         return get_default_dictionaries(get_effective_lc_ctype())
-    dictionaries: List[str] = []
+    dictionaries: list[str] = []
     for dictionary in [re.sub(re.escape('none'), 'None', x.strip(),
                               flags=re.IGNORECASE)
                        for x in dictionaries_str.split(',') if x.strip()]:
@@ -2382,7 +2378,7 @@ def get_flag(lookup_text: str) -> str:
         return FLAGS[locale.language]
     return FLAGS['None']
 
-def get_flags(dictionaries: List[str]) -> Dict[str, str]:
+def get_flags(dictionaries: list[str]) -> dict[str, str]:
     # pylint: disable=line-too-long
     '''
     Examples:
@@ -2393,8 +2389,8 @@ def get_flags(dictionaries: List[str]) -> Dict[str, str]:
     {'fr_FR': '🇫🇷fr_FR', 'de_DE': '🇩🇪de_DE', 'fy_DE': '🇩🇪fy_DE', 'eo': '🌍eo', 'de': '🌍de', '150': '🌍150'}
     '''
     # pylint: enable=line-too-long
-    flags: Dict[str, str] = {}
-    flags_seen: Set[str] = set()
+    flags: dict[str, str] = {}
+    flags_seen: set[str] = set()
     duplicate_flags = False
     for dictionary in dictionaries:
         new_flag = get_flag(dictionary)
@@ -2691,7 +2687,7 @@ SPANISH_419_LOCALES = (
     'es_PA', 'es_PE', 'es_PR', 'es_PY', 'es_SV', 'es_US',
     'es_UY', 'es_VE',)
 
-def expand_languages(languages: Iterable[str]) -> List[str]:
+def expand_languages(languages: Iterable[str]) -> list[str]:
     # pylint: disable=line-too-long
     '''Expands the given list of languages by including fallbacks.
 
@@ -2977,9 +2973,7 @@ def text_ends_a_sentence(text: str = '', language: str = '') -> bool:
         auto_capitalize_characters += ';'
     pattern_new_sentence = re.compile(
         r'[' + re.escape(auto_capitalize_characters) + r']+[\s]*$')
-    if pattern_new_sentence.search(text):
-        return True
-    return False
+    return bool(pattern_new_sentence.search(text))
 
 def lstrip_token(token: str) -> str:
     '''Strips some characters from the left side of a token
@@ -3042,7 +3036,7 @@ def strip_token(token: str) -> str:
     '''
     return rstrip_token(lstrip_token(token))
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str) -> list[str]:
     '''Splits a text into tokens
 
     Returns a list of tokens
@@ -3125,9 +3119,7 @@ def msymbol_triggers_commit(msymbol: str) -> bool:
     '''
     if not re.search(MSYMBOL_TRIGGERS_COMMIT_PREFIX_PATTERN, msymbol):
         return False
-    if re.search(MSYMBOL_TRIGGERS_COMMIT_FORBIDDEN_POSTFIX_PATTERN, msymbol):
-        return False
-    return True
+    return not re.search(MSYMBOL_TRIGGERS_COMMIT_FORBIDDEN_POSTFIX_PATTERN, msymbol)
 
 def elide_middle(text: str, max_length: int = 80, ellipsis: str = '…') -> str:
     '''Elides a string in the middle if it is too long
@@ -3277,16 +3269,7 @@ TRANS_TABLE = {
     ord('Ŧ'): 'T',
 }
 
-# @functools.cache is available only in Python >= 3.9.
-#
-# Python >= 3.9 is not available on RHEL8, not yet on openSUSE
-# Tumbleweed (2021-22-29), ...
-#
-# But @functools.lru_cache(maxsize=None) is the same and it is
-# available for Python >= 3.2, that means it should be available
-# everywhere.
-
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def remove_accents(text: str, keep: str = '') -> str:
     # pylint: disable=line-too-long
     '''Removes accents from the text
@@ -3564,27 +3547,25 @@ def is_right_to_left_messages() -> bool:
     if not lc_messages_locale:
         return False
     lang = lc_messages_locale.split('_')[0]
-    if lang in ('ar', 'arc', 'ary', 'brh', 'dv', 'fa', 'he', 'ps', 'syr', 'ur', 'yi'):
-        # 'ku' could be Latin script or Arabic script or even Cyrillic
-        # or Armenian script
-        #
-        # 'rhg' (Rohingya) could be written in Rohg (RTL),
-        # Arab (RTL), Mymr (LTR), Latn (LTR), Beng (LTR)
-        # There is no glibc locale yet for 'rhg'
-        #
-        # 'man' uses the Nkoo script (RTL)
-        # Ther are several varieties of 'man': 'kao', 'mlq', 'mnk',
-        # 'mwk', 'xkg', 'jad', 'rkm', 'bm', 'bam', 'mku', 'emk', 'msc'
-        # 'mzj', 'jod', 'jud', 'kfo', 'kga', 'mxx', 'dyu', 'bof', 'skq'
-        # There is no glibc locale yet for any of these.
-        #
-        # 'wo' (Wolof) may be written in Gara (RTL). There is no locale
-        # for this script yet, the wo_SN glibc locale uses Latn script.
-        #
-        # 'ff' (Fula) may be written in Adlm (RTL). There is no locale for
-        # this script yet, the ff_SN glibc locale uses Latn script.
-        return True
-    return False
+    # 'ku' could be Latin script or Arabic script or even Cyrillic
+    # or Armenian script
+    #
+    # 'rhg' (Rohingya) could be written in Rohg (RTL),
+    # Arab (RTL), Mymr (LTR), Latn (LTR), Beng (LTR)
+    # There is no glibc locale yet for 'rhg'
+    #
+    # 'man' uses the Nkoo script (RTL)
+    # Ther are several varieties of 'man': 'kao', 'mlq', 'mnk',
+    # 'mwk', 'xkg', 'jad', 'rkm', 'bm', 'bam', 'mku', 'emk', 'msc'
+    # 'mzj', 'jod', 'jud', 'kfo', 'kga', 'mxx', 'dyu', 'bof', 'skq'
+    # There is no glibc locale yet for any of these.
+    #
+    # 'wo' (Wolof) may be written in Gara (RTL). There is no locale
+    # for this script yet, the wo_SN glibc locale uses Latn script.
+    #
+    # 'ff' (Fula) may be written in Adlm (RTL). There is no locale for
+    # this script yet, the ff_SN glibc locale uses Latn script.
+    return lang in ('ar', 'arc', 'ary', 'brh', 'dv', 'fa', 'he', 'ps', 'syr', 'ur', 'yi')
 
 def is_right_to_left(text: str) -> bool:
     # pylint: disable=bidirectional-unicode
@@ -3731,15 +3712,13 @@ def ibus_write_cache() -> bool:
     except subprocess.TimeoutExpired as error:
         LOGGER.error('ibus write-cache command timed out: %s', error)
     except subprocess.CalledProcessError as error:
-        LOGGER.exception(
-            'Exception when calling %s: %s stderr: %s',
-            ibus_binary, error, error.stderr)
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.exception(
-            'Exception when calling %s: %s', ibus_binary, error)
+        LOGGER.exception('Exception when calling %s: stderr: %s',
+                         ibus_binary, error.stderr)
+    except Exception: # pylint: disable=broad-except
+        LOGGER.exception('Exception when calling %s', ibus_binary)
     return False
 
-def ibus_read_cache() -> Dict[str, Dict[str, str]]:
+def ibus_read_cache() -> dict[str, dict[str, str]]:
     '''Call `ibus read-cache` and parse engine information
 
     :return: Dictionary containing information like this:
@@ -3768,18 +3747,15 @@ def ibus_read_cache() -> Dict[str, Dict[str, str]]:
                 result_dict[name_elem.text] = {
                     'symbol': symbol_elem.text, 'icon': icon_elem.text}
         return result_dict
-    except subprocess.TimeoutExpired as error:
-        LOGGER.error('ibus read-cache command timed out: %s', error)
+    except subprocess.TimeoutExpired:
+        LOGGER.error('ibus read-cache command timed out')
     except subprocess.CalledProcessError as error:
-        LOGGER.exception(
-            'Exception when calling %s: %s stderr: %s',
-            ibus_binary, error, error.stderr)
-    except xml.etree.ElementTree.ParseError as error:
-        LOGGER.exception(
-            'Failed to parse XML output: %s', error)
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.exception(
-            'Exception when calling %s: %s', ibus_binary, error)
+        LOGGER.exception('Exception when calling %s: stderr: %s',
+                         ibus_binary, error.stderr)
+    except xml.etree.ElementTree.ParseError:
+        LOGGER.exception('Failed to parse XML output')
+    except Exception: # pylint: disable=broad-except
+        LOGGER.exception('Exception when calling %s', ibus_binary)
     return {}
 
 def get_primary_selection_text() -> str:
@@ -3797,8 +3773,8 @@ def get_primary_selection_text() -> str:
                 if result.stdout.strip():
                     LOGGER.info('Got primary selection with xclip.')
                     return result.stdout.strip()
-            except Exception as xclip_error: # pylint: disable=broad-except
-                LOGGER.exception('xclip failed: %s', xclip_error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('xclip failed')
                 return ''
         xsel_binary = shutil.which('xsel')
         if xsel_binary:
@@ -3811,8 +3787,8 @@ def get_primary_selection_text() -> str:
                 if result.stdout.strip():
                     LOGGER.info('Got primary selection with xsel.')
                     return result.stdout.strip()
-            except Exception as xsel_error: # pylint: disable=broad-except
-                LOGGER.exception('xsel failed: %s', xsel_error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('xsel failed')
                 return ''
     if os.environ.get('XDG_SESSION_TYPE', '').lower() == 'wayland':
         wl_paste_binary = shutil.which('wl-paste')
@@ -3826,8 +3802,8 @@ def get_primary_selection_text() -> str:
                 if result.stdout.strip():
                     LOGGER.info('Got primary selection with wl-paste.')
                     return result.stdout.strip()
-            except Exception as wl_paste_error: # pylint: disable=broad-except
-                LOGGER.exception('wl-paste failed: %s', wl_paste_error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('wl-paste failed')
                 return ''
     # Run python helper script using Gtk4 to get the selection.
     try:
@@ -3841,11 +3817,11 @@ def get_primary_selection_text() -> str:
         if result.stdout.strip():
             LOGGER.info('Got primary selection with Gtk4.')
             return result.stdout.strip()
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.exception('Primary selection helper failed: %s', error)
+    except Exception: # pylint: disable=broad-except
+        LOGGER.exception('Primary selection helper failed')
     return ''
 
-def merge_dicts_max(*dicts: Dict[str, int]) -> Dict[str, int]:
+def merge_dicts_max(*dicts: dict[str, int]) -> dict[str, int]:
     '''Merges multiple dictionaries, keeping the maximum value for each key.
 
     :param *dicts: Variable number of dictionaries with string keys and
@@ -3874,12 +3850,11 @@ def merge_dicts_max(*dicts: Dict[str, int]) -> Dict[str, int]:
     max_values: DefaultDict[str, int] = defaultdict(lambda: -sys.maxsize - 1)
     for d in dicts:
         for key, value in d.items():
-            if value > max_values[key]:
-                max_values[key] = value
+            max_values[key] = max(max_values[key], value)
     return dict(max_values)
 
 def dict_update_existing_keys(
-        pdict: Dict[Any, Any], other_pdict: Dict[Any, Any]) -> None:
+        pdict: dict[Any, Any], other_pdict: dict[Any, Any]) -> None:
     '''Update values of existing keys in a Python dict from another Python dict
 
     Using pdict.update(other_pdict) would add keys and values from other_pdict
@@ -4011,12 +3986,12 @@ def distro_id() -> str:
         return str(distro.id())
     return ''
 
-def hunspell_dirnames() -> List[str]:
+def hunspell_dirnames() -> list[str]:
     '''
     Return a list of directories where hunspell dictionaries
     should be searched.
     '''
-    dirnames: List[str] = []
+    dirnames: list[str] = []
     datadir = os.path.join(os.path.dirname(__file__), '../data')
     user_datadir = xdg_save_data_path('ibus-typing-booster/data')
     dicpaths = []
@@ -4041,13 +4016,13 @@ def hunspell_dirnames() -> List[str]:
     ])
     return dirnames
 
-def find_hunspell_dictionary(language: str) -> Tuple[str, str]:
+def find_hunspell_dictionary(language: str) -> tuple[str, str]:
     '''
     Find the hunspell dictionary file for a language
 
     :param language: The language of the dictionary to search for
 
-    The returned Tuple contains (dic_path, aff_path) where
+    The returned tuple contains (dic_path, aff_path) where
     dic_path is the full path of the .dic file found
     and aff_path is the full path of the .aff file found.
     If no dictionary can be found for the requested language,
@@ -4055,7 +4030,7 @@ def find_hunspell_dictionary(language: str) -> Tuple[str, str]:
     '''
     dic_path = ''
     aff_path = ''
-    dirnames: List[str] = hunspell_dirnames()
+    dirnames: list[str] = hunspell_dirnames()
     for lang in expand_languages([language]):
         if lang.startswith('en') and not language.startswith('en'):
             # never fall back to 'en' if language is not English.  For
@@ -4072,13 +4047,13 @@ def find_hunspell_dictionary(language: str) -> Tuple[str, str]:
     return ('', '')
 
 def get_hunspell_dictionary_wordlist(
-        language: str) -> Tuple[str, str, List[str]]:
+        language: str) -> tuple[str, str, list[str]]:
     '''
     Open the hunspell dictionary file for a language
 
     :param language: The language of the dictionary to open
 
-    The returned Tuple looks  like this:
+    The returned tuple looks  like this:
 
         (dic_path, dictionary_encoding, wordlist)
 
@@ -4100,13 +4075,10 @@ def get_hunspell_dictionary_wordlist(
                       encoding='ISO-8859-1',
                       errors='ignore') as aff_file:
                 aff_buffer = aff_file.read().replace('\r\n', '\n')
-        except (FileNotFoundError, PermissionError) as error:
-            LOGGER.exception('Error loading .aff File %s: %s: %s',
-                             aff_path, error.__class__.__name__, error)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Unexpected error loading .aff File %s: %s: %s',
-                             aff_path, error.__class__.__name__, error)
+        except (FileNotFoundError, PermissionError):
+            LOGGER.exception('Error loading .aff File %s', aff_path)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Unexpected error loading .aff File %s', aff_path)
         if aff_buffer:
             encoding_pattern = re.compile(
                 r'^[\s]*SET[\s]+(?P<encoding>[-a-zA-Z0-9_]+)[\s]*$',
@@ -4128,31 +4100,23 @@ def get_hunspell_dictionary_wordlist(
     try:
         with open(dic_path, encoding=dictionary_encoding) as dic_file:
             dic_buffer = dic_file.readlines()
-    except (UnicodeDecodeError, FileNotFoundError, PermissionError) as error:
-        LOGGER.exception(
-            'loading %s as %s encoding failed, '
-            'fall back to ISO-8859-1. %s: %s',
-            dic_path, dictionary_encoding, error.__class__.__name__, error)
+    except (UnicodeDecodeError, FileNotFoundError, PermissionError):
+        LOGGER.exception('loading %s as %s encoding failed, '
+                         'fall back to ISO-8859-1',
+                         dic_path, dictionary_encoding)
         dictionary_encoding = 'ISO-8859-1'
         try:
             with open(dic_path, encoding=dictionary_encoding) as dic_file:
                 dic_buffer = dic_file.readlines()
-        except (UnicodeDecodeError,
-                FileNotFoundError,
-                PermissionError) as error2:
-            LOGGER.exception(
-                'loading %s as %s encoding failed, giving up. %s: %s',
-                dic_path, dictionary_encoding, error.__class__.__name__, error2)
+        except (UnicodeDecodeError, FileNotFoundError, PermissionError):
+            LOGGER.exception('loading %s as %s encoding failed, giving up',
+                             dic_path, dictionary_encoding)
             return ('', '', [])
-        except Exception as error2: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Unexpected error loading .dic File %s: %s: %s',
-                dic_path, error.__class__.__name__, error2)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Unexpected error loading .dic File %s', dic_path)
             return ('', '', [])
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.exception(
-            'Unexpected error loading .dic File %s: %s: %s',
-            dic_path, error.__class__.__name__, error)
+    except Exception: # pylint: disable=broad-except
+        LOGGER.exception('Unexpected error loading .dic File %s', dic_path)
         return ('', '', [])
     if not dic_buffer:
         return ('', '', [])
@@ -4241,9 +4205,9 @@ class PredictionCandidate:
     spell_checking: bool = False
 
 def best_candidates(
-        phrase_frequencies: Dict[str, float],
+        phrase_frequencies: dict[str, float],
         title: bool = False,
-        max_candidates: int = 20) -> List[PredictionCandidate]:
+        max_candidates: int = 20) -> list[PredictionCandidate]:
     '''Sorts the phrase_frequencies dictionary and returns the best
     candidates.
 
@@ -4267,7 +4231,7 @@ def best_candidates(
                         ))[:max_candidates]]
     if not title:
         return candidates
-    candidates_title: List[PredictionCandidate] = []
+    candidates_title: list[PredictionCandidate] = []
     seen_phrases = set()
     for candidate in candidates:
         phrase_title = candidate.phrase[:1].title() + candidate.phrase[1:]
@@ -4624,7 +4588,7 @@ class ComposeSequences:
         if hasattr(IBus, 'KEY_dead_longsolidusoverlay'):
             self._dead_keys[
                 getattr(IBus, 'KEY_dead_longsolidusoverlay')] = '\u0338'
-        self._compose_sequences: Dict[int, Any] = {}
+        self._compose_sequences: dict[int, Any] = {}
         compose_file_paths = []
         # Gtk reads compose files like this:
         #
@@ -4852,22 +4816,18 @@ class ComposeSequences:
                       encoding='UTF-8',
                       errors='ignore') as compose_file:
                 lines = compose_file.readlines()
-        except FileNotFoundError as error:
-            LOGGER.exception('Error loading %s: %s: %s: %s',
-                             compose_path, _('File not found'),
-                             error.__class__.__name__, error)
-        except PermissionError as error:
-            LOGGER.exception('Error loading %s: %s: %s: %s',
-                             compose_path, _('Permission error'),
-                             error.__class__.__name__, error)
-        except UnicodeDecodeError as error:
-            LOGGER.exception('Error loading %s: %s: %s: %s',
-                             compose_path, _('Unicode decoding error'),
-                             error.__class__.__name__, error)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception('Unexpected error loading %s: %s: %s: %s',
-                             compose_path, _('Unknown error'),
-                             error.__class__.__name__, error)
+        except FileNotFoundError:
+            LOGGER.exception('Error loading %s: %s',
+                             compose_path, _('File not found'))
+        except PermissionError:
+            LOGGER.exception('Error loading %s: %s',
+                             compose_path, _('Permission error'))
+        except UnicodeDecodeError:
+            LOGGER.exception('Error loading %s: %s',
+                             compose_path, _('Unicode decoding error'))
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Unexpected error loading %s: %s',
+                             compose_path, _('Unknown error'))
         if not lines:
             LOGGER.warning('File %s has no content', compose_path)
             return
@@ -4902,7 +4862,7 @@ class ComposeSequences:
                 result = result.replace('\\\\', '\\')
                 self._add_compose_sequence(sequence, result)
 
-    def preedit_representation(self, keyvals: List[int]) -> str:
+    def preedit_representation(self, keyvals: list[int]) -> str:
         # pylint: disable=line-too-long
         '''Returns a text to display in the preedit for a partially
         typed compose sequence.
@@ -4970,7 +4930,7 @@ class ComposeSequences:
         return representation
 
     def _compose_dead_key_sequence(
-            self, keyvals: List[int]) -> Optional[str]:
+            self, keyvals: list[int]) -> Optional[str]:
         # pylint: disable=line-too-long
         '''
         Interprets a list of key values as a dead key sequence
@@ -5081,7 +5041,7 @@ class ComposeSequences:
 
     def compose(
             self,
-            keyvals: List[int],
+            keyvals: list[int],
             keypad_fallback: bool = True) -> Optional[str]:
         # pylint: disable=line-too-long
         '''
@@ -5184,7 +5144,7 @@ class ComposeSequences:
             return self._compose_dead_key_sequence(keyvals)
         return None
 
-    def lookup_representation(self, keyvals: List[int]) -> str:
+    def lookup_representation(self, keyvals: list[int]) -> str:
         # pylint: disable=line-too-long
         '''Returns a string representation of a compose sequence
 
@@ -5312,14 +5272,14 @@ class ComposeSequences:
         return representation
 
     def _lookup_representations(
-            self, keyval_sequences: List[List[int]]) -> List[str]:
+            self, keyval_sequences: list[list[int]]) -> list[str]:
         # pylint: disable=line-too-long
         '''Returns a list of string representations (for lookup tables) of
         compose sequences given as lists of key values
 
         This is only for testing self.find_compose_completions().
 
-        :param keyval_sequences: A List containing lists of key values
+        :param keyval_sequences: A list containing lists of key values
 
         Examples:
 
@@ -5340,10 +5300,10 @@ class ComposeSequences:
 
     def list_compose_sequences(
             self,
-            compose_sequences: Dict[int, Union[Dict[Any, Any], str]],
-            partial_sequence: Optional[List[int]] = None,
-            available_keyvals: Optional[Set[int]] = None,
-            omit_sequences_involving_keypad: bool = True) -> List[List[int]]:
+            compose_sequences: dict[int, Union[dict[Any, Any], str]],
+            partial_sequence: Optional[list[int]] = None,
+            available_keyvals: Optional[set[int]] = None,
+            omit_sequences_involving_keypad: bool = True) -> list[list[int]]:
         '''Lists all possible compose sequences in a dictionary
 
         Returns a list of possible sequences, each sequence is a list
@@ -5355,7 +5315,7 @@ class ComposeSequences:
                                   compose sequences. Sequences from
                                   the compose_sequences dictionary
                                   which require key values not in this
-                                  Set are not listed.
+                                  set are not listed.
                                   If this parameter is None, *All*
                                   sequences in the compose_sequences
                                   dictionary are listed.
@@ -5365,15 +5325,14 @@ class ComposeSequences:
         '''
         if partial_sequence is None:
             partial_sequence = []
-        possible_sequences: List[List[int]] = []
-        for keyval in compose_sequences:
+        possible_sequences: list[list[int]] = []
+        for keyval, value in compose_sequences.items():
             if available_keyvals and keyval not in available_keyvals:
                 continue
             if (omit_sequences_involving_keypad
                 and IBus.keyval_name(keyval).startswith('KP_')):
                 continue
             new_partial_sequence = partial_sequence + [keyval]
-            value = compose_sequences[keyval]
             if isinstance(value, str):
                 possible_sequences.append(new_partial_sequence)
             else:
@@ -5386,9 +5345,9 @@ class ComposeSequences:
 
     def find_compose_completions(
             self,
-            keyvals: List[int],
-            available_keyvals: Optional[Set[int]] = None,
-            omit_sequences_involving_keypad: bool = True) -> List[List[int]]:
+            keyvals: list[int],
+            available_keyvals: Optional[set[int]] = None,
+            omit_sequences_involving_keypad: bool = True) -> list[list[int]]:
         # pylint: disable=line-too-long
         '''Lists all possible compose sequences in the dictionary starting
         with keyvals using only available_keyvals to complete a
@@ -5473,8 +5432,8 @@ class M17nDbInfo:
     methods from m17n-db.
     '''
     def __init__(self) -> None:
-        self._dirs: List[str] = []
-        self._imes: Dict[str, Dict[str, str]] = {}
+        self._dirs: list[str] = []
+        self._imes: dict[str, dict[str, str]] = {}
         self._version: str = ''
         self._major_version: int = 0
         self._minor_version: int = 0
@@ -5496,19 +5455,14 @@ class M17nDbInfo:
                     encoding='utf-8', check=True)
                 self._version = result.stdout.strip()
                 LOGGER.info('%s printed: %s', m17n_db_binary, self._version)
-            except FileNotFoundError as error:
-                LOGGER.exception(
-                    'Exception when calling %s: %s: %s',
-                    m17n_db_binary, error.__class__.__name__, error)
+            except FileNotFoundError:
+                LOGGER.exception('Exception when calling %s', m17n_db_binary)
             except subprocess.CalledProcessError as error:
                 LOGGER.exception(
-                    'Exception when calling %s: %s: %s stderr: %s',
-                    m17n_db_binary,
-                    error.__class__.__name__, error, error.stderr)
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception(
-                    'Exception when calling %s: %s: %s',
-                    m17n_db_binary, error.__class__.__name__, error)
+                    'Exception when calling %s: stderr: %s',
+                    m17n_db_binary, error.stderr)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Exception when calling %s', m17n_db_binary)
         if self._version:
             (major, minor, micro) = self._version.split('.')
             self._major_version = int(major)
@@ -5536,19 +5490,14 @@ class M17nDbInfo:
                     encoding='utf-8', check=True)
                 system_dir = result.stdout.strip()
                 LOGGER.info('%s printed: %s', m17n_db_binary, system_dir)
-            except FileNotFoundError as error:
-                LOGGER.exception(
-                    'Exception when calling %s: %s: %s',
-                    m17n_db_binary, error.__class__.__name__, error)
+            except FileNotFoundError:
+                LOGGER.exception('Exception when calling %s', m17n_db_binary)
             except subprocess.CalledProcessError as error:
                 LOGGER.exception(
-                    'Exception when calling %s: %s: %s stderr: %s',
-                    m17n_db_binary,
-                    error.__class__.__name__, error, error.stderr)
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception(
-                    'Exception when calling %s: %s: %s',
-                    m17n_db_binary, error.__class__.__name__, error)
+                    'Exception when calling %s: stderr: %s',
+                    m17n_db_binary, error.stderr)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Exception when calling %s', m17n_db_binary)
         if not os.path.isdir(system_dir):
             dirnames = (
                 '/usr/share/m17n',
@@ -5594,22 +5543,18 @@ class M17nDbInfo:
                               encoding='UTF-8',
                               errors='ignore') as ime_file:
                         full_contents = ime_file.read()
-                except FileNotFoundError as error:
-                    LOGGER.exception('Error loading %s: %s: %s: %s',
-                                     mim_path, _('File not found'),
-                                     error.__class__.__name__, error)
-                except PermissionError as error:
-                    LOGGER.exception('Error loading %s: %s: %s: %s',
-                                     mim_path, _('Permission error'),
-                                     error.__class__.__name__, error)
-                except UnicodeDecodeError as error:
-                    LOGGER.exception('Error loading %s: %s: %s: %s',
-                                     mim_path, _('Unicode decoding error'),
-                                     error.__class__.__name__, error)
-                except Exception as error: # pylint: disable=broad-except
-                    LOGGER.exception('Unexpected error loading %s: %s: %s: %s',
-                                     mim_path, _('Unknown error'),
-                                     error.__class__.__name__, error)
+                except FileNotFoundError:
+                    LOGGER.exception('Error loading %s: %s',
+                                     mim_path, _('File not found'))
+                except PermissionError:
+                    LOGGER.exception('Error loading %s: %s',
+                                     mim_path, _('Permission error'))
+                except UnicodeDecodeError:
+                    LOGGER.exception('Error loading %s: %s',
+                                     mim_path, _('Unicode decoding error'))
+                except Exception: # pylint: disable=broad-except
+                    LOGGER.exception('Unexpected error loading %s: %s',
+                                     mim_path, _('Unknown error'))
                 if not full_contents:
                     LOGGER.warning('File %s has no content', mim_path)
                     continue
@@ -5686,7 +5631,7 @@ class M17nDbInfo:
         '''Returns the major version of m17n-db as an integer'''
         return self._micro_version
 
-    def get_dirs(self) -> List[str]:
+    def get_dirs(self) -> list[str]:
         '''
         Returns the list of directories  which contain the m17n input methods.
 
@@ -5701,7 +5646,7 @@ class M17nDbInfo:
         '''
         return self._dirs[:]
 
-    def get_imes(self) -> List[str]:
+    def get_imes(self) -> list[str]:
         '''Get a list of the available input methods
 
         The special input method 'NoIME' should always be first
@@ -5807,7 +5752,7 @@ def is_desktop(name: str) -> bool:
         for env_var in
         ('XDG_CURRENT_DESKTOP', 'XDG_SESSION_DESKTOP', 'DESKTOP_SESSION'))
 
-def get_gnome_shell_version() -> Tuple[int, ...]:
+def get_gnome_shell_version() -> tuple[int, ...]:
     '''Returns the gnome-shell version as a tuple
 
     `gnome-shell --version` prints something like 'GNOME Shell 48.2'
@@ -5871,7 +5816,7 @@ class KeyEvent:
             #
             # to make it possible for me to always work
             # with the same names, no matter the ibus version
-            self.name = f'0x{0x1000000  + int(self.name[2:], 16):x}'
+            self.name = f'0x{0x1000000  + int(self.name[2:], 16):x}'  # noqa: FURB166
         self.unicode = IBus.keyval_to_unicode(self.val)
         self.msymbol = self.unicode
         if not self.msymbol:
@@ -5965,20 +5910,16 @@ class KeyEvent:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, KeyEvent):
             return NotImplemented
-        if (self.val == other.val
+        return (self.val == other.val
                 and self.code == other.code
-                and self.state == other.state):
-            return True
-        return False
+                and self.state == other.state)
 
     def __ne__(self, other: object) -> bool:
         if not isinstance(other, KeyEvent):
             return NotImplemented
-        if (self.val != other.val
+        return (self.val != other.val
                 or self.code != other.code
-                or self.state != other.state):
-            return True
-        return False
+                or self.state != other.state)
 
     def __str__(self) -> str:
         return repr(
@@ -6092,7 +6033,7 @@ def keybinding_to_keyevent(keybinding: str) -> KeyEvent:
     name = keybinding.split('+')[-1]
     keyval = IBus.keyval_from_name(name)
     if keyval == IBus.KEY_VoidSymbol and re.match(r'0x10[0-9a-fA-F]{5}', name):
-        keyval = int(name[2:], 16)
+        keyval = int(name, 0)
     state = 0
     if 'Shift+' in keybinding:
         state |= IBus.ModifierType.SHIFT_MASK
@@ -6122,8 +6063,8 @@ class HotKeys:
     '''Class to make checking whether a key matches a hotkey for a certain
     command easy
     '''
-    def __init__(self, keybindings: Dict[str, List[str]]) -> None:
-        self._hotkeys: Dict[str, List[Tuple[int, int]]] = {}
+    def __init__(self, keybindings: dict[str, list[str]]) -> None:
+        self._hotkeys: dict[str, list[tuple[int, int]]] = {}
         for command in keybindings:
             for keybinding in keybindings[command]:
                 key = keybinding_to_keyevent(keybinding)
@@ -6135,7 +6076,7 @@ class HotKeys:
                     self._hotkeys[command] = [(val, state)]
 
     def __contains__(
-            self, command_key_tuple: Tuple[Optional[KeyEvent], KeyEvent, str]) -> bool:
+            self, command_key_tuple: tuple[Optional[KeyEvent], KeyEvent, str]) -> bool:
         if not isinstance(command_key_tuple, tuple):
             return False
         command = command_key_tuple[2]
@@ -6193,7 +6134,7 @@ class HotKeys:
 AUDIO_RATE: int = 16000
 AUDIO_CHUNK: int = int(AUDIO_RATE / 10)  # 100ms
 
-class MicrophoneStream():
+class MicrophoneStream:
     '''Opens a recording stream as a generator yielding the audio chunks.
 
     This code is from:
@@ -6257,7 +6198,7 @@ class MicrophoneStream():
             in_data: Any,
             _frame_count: Any,
             _time_info: Any,
-            _status_flags: Any) -> Tuple[None, Any]:
+            _status_flags: Any) -> tuple[None, Any]:
         """Continuously collect data from the audio stream, into the buffer."""
         self._buff.put(in_data)
         assert pyaudio is not None

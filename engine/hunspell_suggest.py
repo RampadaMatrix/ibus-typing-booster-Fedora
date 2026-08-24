@@ -29,7 +29,7 @@ import sys
 import unicodedata
 from collections.abc import Iterable
 from types import ModuleType
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Optional
 
 import itb_util_core
 
@@ -69,9 +69,9 @@ MAX_WORDS = 100
 # pylint: disable=attribute-defined-outside-init
 class Dictionary:
     '''A class to hold a hunspell dictionary'''
-    _instances: Dict[Tuple[Type['Dictionary'], str], 'Dictionary'] = {}
+    _instances: dict[tuple[type['Dictionary'], str], 'Dictionary'] = {}
 
-    def __new__(cls: Type['Dictionary'], name: str = 'en_US') -> 'Dictionary':
+    def __new__(cls: type['Dictionary'], name: str = 'en_US') -> 'Dictionary':
         '''Caching instances of this class and reuse previously created instances'''
         key = (cls, name)
         if key not in cls._instances:
@@ -88,8 +88,8 @@ class Dictionary:
         self.language = self.name.split('_')[0]
         self.dic_path = ''
         self.encoding = 'UTF-8'
-        self.words: List[str]= []
-        self.word_pairs: List[Tuple[str, str]] = []
+        self.words: list[str]= []
+        self.word_pairs: list[tuple[str, str]] = []
         self.max_word_len = 0 # maximum length of words in this dictionary
         self.enchant_dict = None
         self.pyhunspell_object = None
@@ -142,15 +142,12 @@ class Dictionary:
                     if DEBUG_LEVEL > 1 and self.enchant_dict is not None:
                         LOGGER.debug(
                             '%s: %r', self.name, self.enchant_dict.provider)
-                except enchant.errors.DictNotFoundError as error:
-                    LOGGER.exception(
-                        'Error initializing enchant for %s: %s: %s',
-                        self.name, error.__class__.__name__, error)
+                except enchant.errors.DictNotFoundError:
+                    LOGGER.exception('Error initializing enchant for %s', self.name)
                     self.enchant_dict = None
-                except Exception as error: # pylint: disable=broad-except
+                except Exception: # pylint: disable=broad-except
                     LOGGER.exception(
-                        'Unexpected error initializing enchant for %s: %s: %s',
-                        self.name, error.__class__.__name__, error)
+                        'Unexpected error initializing enchant for %s', self.name)
                     self.enchant_dict = None
             elif hunspell is not None and self.dic_path:
                 aff_path = self.dic_path.replace('.dic', '.aff')
@@ -158,16 +155,12 @@ class Dictionary:
                     self.pyhunspell_object = (
                         hunspell.HunSpell( # pylint: disable=used-before-assignment
                             self.dic_path, aff_path))
-                except hunspell.HunSpellError as error:
-                    LOGGER.debug(
-                        'Error initializing hunspell for %s: %s: %s',
-                        self.name, error.__class__.__name__, error)
+                except hunspell.HunSpellError:
+                    LOGGER.debug('Error initializing hunspell for %s', self.name)
                     self.pyhunspell_object = None
-                except Exception as error: # pylint: disable=broad-except
+                except Exception: # pylint: disable=broad-except  # noqa: BLE001
                     LOGGER.debug(
-                        'Unexpected error initializing hunspell for '
-                        '%s: %s: %s',
-                        self.name, error.__class__.__name__, error)
+                        'Unexpected error initializing hunspell for %s', self.name)
                     self.pyhunspell_object = None
 
     def spellcheck_enchant(self, word: str) -> bool:
@@ -259,16 +252,14 @@ class Dictionary:
         >>> d.has_spellchecking()
         False
         '''
-        if self.enchant_dict or self.pyhunspell_object or self.voikko:
-            return True
-        return False
+        return bool(self.enchant_dict or self.pyhunspell_object or self.voikko)
 
-    def spellcheck_suggest_enchant(self, word: str) -> List[str]:
+    def spellcheck_suggest_enchant(self, word: str) -> list[str]:
         '''
         Return spellchecking suggestions for word using enchant
 
         :param word: The word to return spellchecking suggestions for
-        :return: List of spellchecking suggestions, possibly empty.
+        :return: list of spellchecking suggestions, possibly empty.
         '''
         if not word or not self.enchant_dict:
             return []
@@ -283,12 +274,12 @@ class Dictionary:
             self.enchant_dict.suggest(unicodedata.normalize('NFC', word))
             ]
 
-    def spellcheck_suggest_pyhunspell(self, word: str) -> List[str]:
+    def spellcheck_suggest_pyhunspell(self, word: str) -> list[str]:
         '''
         Return spellchecking suggestions for word using pyhunspell
 
         :param word: The word to return spellchecking suggestions for
-        :return: List of spellchecking suggestions, possibly empty.
+        :return: list of spellchecking suggestions, possibly empty.
         '''
         if not word or not self.pyhunspell_object:
             return []
@@ -302,12 +293,12 @@ class Dictionary:
                     self.encoding, 'replace'))
             ]
 
-    def spellcheck_suggest_voikko(self, word: str) -> List[str]:
+    def spellcheck_suggest_voikko(self, word: str) -> list[str]:
         '''
         Return spellchecking suggestions for word using voikko
 
         :param word: The word to return spellchecking suggestions for
-        :return: List of spellchecking suggestions, possibly empty.
+        :return: list of spellchecking suggestions, possibly empty.
         '''
         if not word or not self.voikko:
             return []
@@ -332,12 +323,12 @@ class Dictionary:
     # referring to a self are evicted, then self can be garbage
     # collected properly.
     @functools.lru_cache(maxsize=500_000)
-    def spellcheck_suggest(self, word: str) -> List[str]:
+    def spellcheck_suggest(self, word: str) -> list[str]:
         '''Return spellchecking suggestions for word using enchant,
         pyhunspell or voikko
 
         :param word: The word to return spellchecking suggestions for
-        :return: List of spellchecking suggestions, possibly empty.
+        :return: list of spellchecking suggestions, possibly empty.
 
         Results can be quite different depending on whether enchant or
         pyhunspell is used and in case of enchant whether hunspell,
@@ -385,9 +376,9 @@ class Hunspell:
                     dictionary_names)
             else:
                 LOGGER.debug('Hunspell.__init__(dictionary_names=())\n')
-        self._suggest_cache: Dict[str, List[Tuple[str, int]]] = {}
-        self._dictionary_names: List[str] = list(dictionary_names)
-        self._dictionaries: List[Dictionary] = []
+        self._suggest_cache: dict[str, list[tuple[str, int]]] = {}
+        self._dictionary_names: list[str] = list(dictionary_names)
+        self._dictionaries: list[Dictionary] = []
         self.init_dictionaries()
 
     def init_dictionaries(self) -> None:
@@ -406,14 +397,14 @@ class Hunspell:
         for dictionary_name in self._dictionary_names:
             self._dictionaries.append(Dictionary(name=dictionary_name))
 
-    def get_dictionary_names(self) -> List[str]:
+    def get_dictionary_names(self) -> list[str]:
         '''Returns a copy of the list of dictionary names.
 
         It is important to return a copy, we do not want to change
         the private member variable directly.'''
         return list(self._dictionary_names[:])
 
-    def set_dictionary_names(self, dictionary_names: List[str]) -> None:
+    def set_dictionary_names(self, dictionary_names: list[str]) -> None:
         '''Sets the list of dictionary names.
 
         If the new list of dictionary names differs from the existing
@@ -496,7 +487,7 @@ class Hunspell:
             return False
         return True
 
-    def spellcheck_match_list(self, input_phrase: str) -> List[str]:
+    def spellcheck_match_list(self, input_phrase: str) -> list[str]:
         '''
         Returns a list of dictionaries where input_phrase can be found
 
@@ -524,7 +515,7 @@ class Hunspell:
                 match_list.append(dictionary.name)
         return match_list
 
-    def spellcheck_single_dictionary(self, words: Iterable[str] = ()) -> List[str]:
+    def spellcheck_single_dictionary(self, words: Iterable[str] = ()) -> list[str]:
         '''
         Checks whether there is at least one dictionary where all words
         in the input list spellcheck as True.
@@ -605,7 +596,7 @@ class Hunspell:
     # referring to a self are evicted, then self can be garbage
     # collected properly.
     @functools.lru_cache(maxsize=500_000)
-    def suggest(self, input_phrase: str) -> List[Tuple[str, int]]:
+    def suggest(self, input_phrase: str) -> list[tuple[str, int]]:
         # pylint: disable=line-too-long
         '''Return completions or corrections for the input phrase
 
@@ -702,7 +693,7 @@ class Hunspell:
         input_phrase = unicodedata.normalize(
             itb_util_core.NORMALIZATION_FORM_INTERNAL, input_phrase)
 
-        suggested_words: Dict[str, Dict[str, int]] = {}
+        suggested_words: dict[str, dict[str, int]] = {}
         for dictionary in self._dictionaries:
             name = dictionary.name
             suggested_words[name] = {}

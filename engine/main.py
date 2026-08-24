@@ -28,9 +28,10 @@ import re
 import sys
 import types
 from signal import SIGINT, SIGTERM, signal
-from typing import Any, Optional, Type, Union
+from typing import Any, Optional, Union
 
 # pylint: disable=wrong-import-position
+# ruff: noqa: I001  # require_version() must precede gi.repository imports
 from gi import require_version
 require_version('IBus', '1.0')
 from gi.repository import IBus  # ty: ignore[unresolved-import]
@@ -45,7 +46,7 @@ import itb_version
 LOGGER = logging.getLogger('ibus-typing-booster')
 
 def log_unhandled_exception(
-    exc_type: Type[BaseException],
+    exc_type: type[BaseException],
     exc_value: BaseException,
     exc_traceback: Optional[types.TracebackType]
 ) -> None:
@@ -274,9 +275,7 @@ def write_xml() -> None:
     '''
     m17n_db_info = itb_util_core.M17nDbInfo()
     m17n_input_methods = set(m17n_db_info.get_imes())
-    m17n_input_methods_skip = set([
-        'NoIME',
-    ])
+    m17n_input_methods_skip = {'NoIME'}
     supported_input_methods = sorted(
         m17n_input_methods - m17n_input_methods_skip
     ) + ['typing-booster']

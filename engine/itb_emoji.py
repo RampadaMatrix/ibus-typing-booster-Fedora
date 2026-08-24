@@ -34,7 +34,7 @@ import sys
 import unicodedata
 from collections.abc import Iterable
 from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional, Set, TextIO, Tuple
+from typing import Any, Callable, Optional, TextIO
 
 import itb_util_core
 
@@ -329,13 +329,12 @@ def _in_range(codepoint: int) -> bool:
     >>> _in_range(ord('₺'))
     True
     '''
-    return any( # pylint: disable=use-a-generator
-        [x <= codepoint <= y for x, y in VALID_RANGES])
+    return any(x <= codepoint <= y for x, y in VALID_RANGES)
 
 def _find_path_and_open_function(
         dirnames: Iterable[str],
         basenames: Iterable[str],
-        subdir: str = '') -> Tuple[str, Optional[Callable[..., TextIO]]]:
+        subdir: str = '') -> tuple[str, Optional[Callable[..., TextIO]]]:
     '''Find the first existing file of a list of basenames and dirnames
 
     For each file in “basenames”, tries whether that file or the
@@ -421,7 +420,7 @@ def find_cldr_annotation_path(language: str) -> str:
         acceptable_match += '_' + locale.script
     for _language in itb_util_core.expand_languages([language]):
         basenames = (_language + '.xml',)
-        (path, dummy_open_function) = _find_path_and_open_function(
+        (path, _dummy_open_function) = _find_path_and_open_function(
             dirnames, basenames, subdir='annotations')
         if path and os.path.basename(path).startswith(acceptable_match):
             return os.path.abspath(path)
@@ -438,7 +437,7 @@ def _match_classic(label: str, match_string: str) -> float:
     label_words = set(label.split())
     label_no_spaces = label.replace(' ', '')
     # Sort longest words first.
-    word_list: List[str] = sorted(match_string.split(), key=len, reverse=True)
+    word_list: list[str] = sorted(match_string.split(), key=len, reverse=True)
     word_set = set(word_list)
     # Exact set match (highest priority)
     # For example 'black cat' counts as an exact match for 'cat black'.
@@ -516,7 +515,7 @@ class EmojiMatcher:
                        the case, this option is ignored.
         '''
         self._languages = languages
-        self._gettext_translations: Dict[str, Any] = {}
+        self._gettext_translations: dict[str, Any] = {}
         for language in itb_util_core.expand_languages(self._languages):
             mo_file = gettext.find(DOMAINNAME, languages=[language])
             if (mo_file
@@ -540,15 +539,15 @@ class EmojiMatcher:
         self._emoji_unicode_max = emoji_unicode_max
         self._variation_selector = variation_selector
         self._romaji = romaji
-        self._unicode_blocks: Dict[range, str] = {}
+        self._unicode_blocks: dict[range, str] = {}
         self._enchant_dicts = []
         if enchant is not None:
             for language in self._languages:
                 if enchant.dict_exists(language):
                     self._enchant_dicts.append(enchant.Dict(language))
-        self._emoji_dict: Dict[Tuple[str, str], Dict[str, Any]] = {}
-        self._candidate_cache: Dict[
-            Tuple[str, int, str, bool], List[itb_util_core.PredictionCandidate]] = {}
+        self._emoji_dict: dict[tuple[str, str], dict[str, Any]] = {}
+        self._candidate_cache: dict[
+            tuple[str, int, str, bool], list[itb_util_core.PredictionCandidate]] = {}
         self._match_function: Callable[[Any, Any], Any] = _match_classic
         self._good_match_score: float = 60.0
         self.set_match_algorithm(match_algorithm)
@@ -618,7 +617,7 @@ class EmojiMatcher:
         self._candidate_cache = {}
         self._variation_selector = variation_selector
 
-    def get_languages(self) -> List[str]:
+    def get_languages(self) -> list[str]:
         # pylint: disable=line-too-long
         '''Returns a copy of the list of languages of this EmojiMatcher
 
@@ -736,7 +735,7 @@ class EmojiMatcher:
         if '\U0001f1e6' <= emoji_string[0] <= '\U0001f1ff':
             # do not insert any variation selectors in flag sequences:
             return emoji_string
-        result: List[str] = []
+        result: list[str] = []
         selector = '\ufe0f' if variation_selector == 'emoji' else '\ufe0e'
         for index, character in enumerate(emoji_string):
             result.append(character)
@@ -753,7 +752,7 @@ class EmojiMatcher:
 
     def _add_to_emoji_dict(
             self,
-            emoji_dict_key: Tuple[str, str],
+            emoji_dict_key: tuple[str, str],
             values_key: str,
             values: Any) -> None:
         '''Adds data to the emoji_dict if not already there'''
@@ -827,10 +826,8 @@ class EmojiMatcher:
                         for name in names.split(','):
                             self._add_to_emoji_dict(
                                 emoji_dict_key, 'names', [name.strip()])
-        except OSError as error:
-            LOGGER.exception(
-                'Error while loading NamesList from %s: %s: %s',
-                path, error.__class__.__name__, error)
+        except OSError:
+            LOGGER.exception('Error while loading NamesList from %s', path)
 
 
     def _load_unikemet(self) -> None:
@@ -853,7 +850,7 @@ class EmojiMatcher:
                             part.strip() for part in line.split('\t', 2))
                     except ValueError:
                         continue # Malformed line
-                    emoji_string = chr(int(codepoint_string[2:],16))
+                    emoji_string = chr(int(codepoint_string[2:],16))  # noqa: FURB166
                     emoji_dict_key = (emoji_string, 'en')
                     if emoji_dict_key in self._emoji_dict:
                         if tag == 'kEH_Desc':
@@ -873,10 +870,8 @@ class EmojiMatcher:
                                 self._add_to_emoji_dict(
                                     emoji_dict_key, 'keywords',
                                     [description.strip('()')])
-        except OSError as error:
-            LOGGER.exception(
-                'Error while loading Blocks from %s: %s: %s',
-                path, error.__class__.__name__, error)
+        except OSError:
+            LOGGER.exception('Error while loading Blocks from %s', path)
 
     def _load_unicode_blocks(self) -> None:
         '''Loads the names of Unicode blocks'''
@@ -907,10 +902,8 @@ class EmojiMatcher:
                             if emoji_dict_key in self._emoji_dict:
                                 self._add_to_emoji_dict(
                                     emoji_dict_key, 'block', block_name)
-        except OSError as error:
-            LOGGER.exception(
-                'Error while loading Blocks from %s: %s: %s',
-                path, error.__class__.__name__, error)
+        except OSError:
+            LOGGER.exception('Error while loading Blocks from %s', path)
 
     def _load_derived_age(self) -> None:
         '''Loads in which Unicode versions code points were added
@@ -955,10 +948,8 @@ class EmojiMatcher:
                         if emoji_dict_key in self._emoji_dict:
                             self._add_to_emoji_dict(
                                 emoji_dict_key, 'uversion', unicode_version)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading DerivedAge: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading DerivedAge')
 
     def _load_name_aliases(self) -> None:
         '''Loads alternative names from NameAliases.txt'''
@@ -985,10 +976,8 @@ class EmojiMatcher:
                     if emoji_dict_key in self._emoji_dict:
                         self._add_to_emoji_dict(
                             emoji_dict_key, 'names', [alias.lower()])
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading NameAliases: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading NameAliases')
 
     def _load_unicode_data(self) -> None:
         '''Loads character names from UnicodeData.txt'''
@@ -1035,10 +1024,8 @@ class EmojiMatcher:
                             category,
                             UNICODE_CATEGORIES[category]['major'],
                             UNICODE_CATEGORIES[category]['minor']])
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading UnicodeData: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading UnicodeData')
 
     def _load_unicode_emoji_data(self) -> None:
         '''
@@ -1090,10 +1077,8 @@ class EmojiMatcher:
                             # _load_derived_age():
                             self._add_to_emoji_dict(
                                 emoji_dict_key, 'uversion', emoji_version)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading emoji-data.txt: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading emoji-data.txt')
 
     def _load_unicode_emoji_sequences(self) -> None:
         '''
@@ -1153,10 +1138,8 @@ class EmojiMatcher:
                                     emoji_version][-1]
                             self._add_to_emoji_dict(
                                 emoji_dict_key, 'uversion', unicode_version)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading emoji-sequences.txt: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading emoji-sequences.txt')
 
     def _load_unicode_emoji_zwj_sequences(self) -> None:
         '''
@@ -1212,10 +1195,8 @@ class EmojiMatcher:
                                     emoji_version][-1]
                             self._add_to_emoji_dict(
                                 emoji_dict_key, 'uversion', unicode_version)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading emoji-zwj-sequences.txt: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading emoji-zwj-sequences.txt')
 
     def _load_unicode_emoji_test(self) -> None:
         '''Loads emoji property data from emoji-test.txt
@@ -1312,10 +1293,8 @@ class EmojiMatcher:
                             LOGGER.warning('Emoji “%s” lacks Unicode version, '
                                            'this should not happen!',
                                            emoji_string)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading emoji-test.txt: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading emoji-test.txt')
 
     def _load_emojione_data(self) -> None:
         '''
@@ -1334,7 +1313,7 @@ class EmojiMatcher:
         with open_function(
                 path, mode='rt', encoding='utf-8') as emoji_one_file:
             emojione = json.load(emoji_one_file)
-        for dummy_emojione_key, emojione_value in emojione.items():
+        for emojione_value in emojione.values():
             codepoints = emojione_value['code_points']['fully_qualified']
 
             emoji_string = ''.join([
@@ -1375,7 +1354,7 @@ class EmojiMatcher:
             # does not change the score but it may have an effect on
             # the additional information added to the display string
             # added because of a keyword match).
-            keywords = sorted(list(set(emojione_value['keywords'])))
+            keywords = sorted(set(emojione_value['keywords']))
             if '' in keywords:
                 # EmojiOne 3 has some empty strings in the keyword lists
                 # remove them:
@@ -1423,7 +1402,7 @@ class EmojiMatcher:
                 emoji_string, categories)
 
     def _add_translated_categories_to_emoji_dict(
-            self, emoji_string: str, categories: List[str]) -> None:
+            self, emoji_string: str, categories: list[str]) -> None:
         '''
         Add translated versions of categories for an emoji
         to self._emoji_dict
@@ -1543,24 +1522,22 @@ class EmojiMatcher:
                     else:
                         self._add_to_emoji_dict(
                             emoji_dict_key, label, content_parts)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Error while loading cldr annotation data: %s: %s',
-                error.__class__.__name__, error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Error while loading cldr annotation data')
 
     def candidates(
             self,
             query_string: str,
             match_limit: int = 20,
             trigger_characters: str  = '',
-            spellcheck: bool = False) -> List[itb_util_core.PredictionCandidate]:
+            spellcheck: bool = False) -> list[itb_util_core.PredictionCandidate]:
         # pylint: disable=line-too-long
         '''
         Find a list of emoji which best match a query string.
 
         :param query_string: A search string
         :param match_limit: Limit the number of matches to this amount
-        :return: List of emoji which best match the query string
+        :return: list of emoji which best match the query string
 
         Returns a list of tuples of the form (<emoji>, <name>, <score),
                 i.e. a list like this:
@@ -1934,7 +1911,7 @@ class EmojiMatcher:
             query_string: str,
             match_limit: int = 20,
             trigger_characters: str  = '',
-            spellcheck: bool = False) -> List[itb_util_core.PredictionCandidate]:
+            spellcheck: bool = False) -> list[itb_util_core.PredictionCandidate]:
         # Remove the trigger characters from the beginning and end of
         # the query string:
         if query_string[:1] and query_string[:1] in trigger_characters:
@@ -2112,7 +2089,7 @@ class EmojiMatcher:
     # referring to a self are evicted, then self can be garbage
     # collected properly.
     @functools.lru_cache(maxsize=500_000)
-    def get_all_label_words(self, emoji_key: Tuple[str, str]) -> Set[str]:
+    def get_all_label_words(self, emoji_key: tuple[str, str]) -> set[str]:
         '''Returns all words in all labels of an emoji'''
         emoji_value = self._emoji_dict.get(emoji_key, None)
         if emoji_value is None:
@@ -2128,7 +2105,7 @@ class EmojiMatcher:
             for word in label.lower().split()
         }
 
-    def names(self, emoji_string: str, language: str = '') -> List[str]:
+    def names(self, emoji_string: str, language: str = '') -> list[str]:
         # pylint: disable=line-too-long
         '''Find the names of an emoji
 
@@ -2249,7 +2226,7 @@ class EmojiMatcher:
             return names[0]
         return ''
 
-    def keywords(self, emoji_string: str, language: str = '') -> List[str]:
+    def keywords(self, emoji_string: str, language: str = '') -> list[str]:
         # pylint: disable=line-too-long
         '''Return the keywords of an emoji
 
@@ -2289,7 +2266,7 @@ class EmojiMatcher:
                 return keywords
         return []
 
-    def categories(self, emoji_string: str, language: str = '') -> List[str]:
+    def categories(self, emoji_string: str, language: str = '') -> list[str]:
         # pylint: disable=line-too-long
         '''Return the categories of an emoji
 
@@ -2330,7 +2307,7 @@ class EmojiMatcher:
             self,
             emoji_string: str,
             match_limit: int = 1000,
-            show_keywords: bool = True) -> List[itb_util_core.PredictionCandidate]:
+            show_keywords: bool = True) -> list[itb_util_core.PredictionCandidate]:
         # pylint: disable=line-too-long
         '''Find similar emojis
 
@@ -2342,7 +2319,7 @@ class EmojiMatcher:
         :param show_keywords: Whether the list of keywords and categories which
                               matched should be included in the names of the
                               ressults.
-        :return: List of similar emoji
+        :return: list of similar emoji
                 A list of tuples of the form (<emoji>, <name>, <score>),
                 i.e. a list like this:
 
@@ -2468,8 +2445,8 @@ class EmojiMatcher:
         # variation selectors:
         emoji_string = self.variation_selector_normalize(
             emoji_string, variation_selector='')
-        candidate_scores: Dict[Tuple[str, str, str], List[str]] = {}
-        original_labels: Dict[str, Set[str]] = {}
+        candidate_scores: dict[tuple[str, str, str], list[str]] = {}
+        original_labels: dict[str, set[str]] = {}
         expanded_languages = itb_util_core.expand_languages(self._languages)
         label_keys = ('ucategories', 'categories', 'keywords')
         for language in expanded_languages:
@@ -2531,7 +2508,7 @@ class EmojiMatcher:
                                 candidate_scores[scores_key].append(label)
                             else:
                                 candidate_scores[scores_key] = [label]
-        candidates: List[itb_util_core.PredictionCandidate] = [] #List[Tuple[str, str, float]] = []
+        candidates: list[itb_util_core.PredictionCandidate] = [] #list[tuple[str, str, float]] = []
         cldr_order_emoji_string = self.cldr_order(emoji_string)
         for csi in sorted(
                 candidate_scores.items(),
@@ -2557,12 +2534,12 @@ class EmojiMatcher:
                 phrase=emoji, user_freq=float(score), comment=name))
         return candidates
 
-    def emoji_by_label(self) -> Dict[str, Dict[str, Dict[str, List[str]]]]:
+    def emoji_by_label(self) -> dict[str, dict[str, dict[str, list[str]]]]:
         '''
         Return a dictionary listing the emoji by label
         '''
         label_keys = ('ucategories', 'categories', 'keywords', 'names')
-        emoji_by_label_dict: Dict[str, Dict[str, Dict[str, List[str]]]] = {}
+        emoji_by_label_dict: dict[str, dict[str, dict[str, list[str]]]] = {}
         for label_key in label_keys:
             for emoji_key, emoji_value in self._emoji_dict.items():
                 emoji = self.variation_selector_normalize(
@@ -2679,7 +2656,7 @@ class EmojiMatcher:
             return int(self._emoji_dict[(emoji_string, 'en')]['cldr_order'])
         return 0xFFFFFFFF
 
-    def properties(self, emoji_string: str) -> List[str]:
+    def properties(self, emoji_string: str) -> list[str]:
         '''
         Returns the emoji properties of this emoji from the unicode.org data
 
@@ -2694,7 +2671,7 @@ class EmojiMatcher:
             return list(self._emoji_dict[(emoji_string, 'en')]['properties'])
         return []
 
-    def unicode_category(self, emoji_string: str) -> List[str]:
+    def unicode_category(self, emoji_string: str) -> list[str]:
         '''
         Returns the Unicode category of this emoji from UnicodeData.txt
 
@@ -2765,9 +2742,7 @@ class EmojiMatcher:
         version += [0] * (3 - len(version))
         min_version += [0] * (3 - len(min_version))
         max_version += [0] * (3 - len(max_version))
-        if min_version <= version <= max_version:
-            return True
-        return False
+        return min_version <= version <= max_version
 
     def unicode_block(self, emoji_string: str) -> str:
         '''Returns the name of the Unicode block the character is in'''
@@ -2815,11 +2790,9 @@ class EmojiMatcher:
         >>> matcher.skin_tone_modifier_supported('🏻')
         False
         '''
-        if len(self.skin_tone_variants(emoji_string)) > 1:
-            return True
-        return False
+        return len(self.skin_tone_variants(emoji_string)) > 1
 
-    def skin_tone_variants(self, emoji_string: str) -> List[str]:
+    def skin_tone_variants(self, emoji_string: str) -> list[str]:
         # pylint: disable=line-too-long
         '''
         Returns a list of skin tone variants for the given emoji

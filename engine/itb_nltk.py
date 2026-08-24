@@ -33,12 +33,11 @@ it using:
 '''
 
 import sys
-from typing import List
 
 import nltk  # type: ignore[import-untyped]
 
 
-def synonyms(word: str, keep_original: bool = True) -> List[str]:
+def synonyms(word: str, keep_original: bool = True) -> list[str]:
     '''List synonyms for word
 
     :param word: The word for which synonyms should be looked up
@@ -64,7 +63,7 @@ def synonyms(word: str, keep_original: bool = True) -> List[str]:
         result = [word] + result
     return result[:]
 
-def hyponyms(word: str, keep_original: bool = True) -> List[str]:
+def hyponyms(word: str, keep_original: bool = True) -> list[str]:
     # pylint: disable=line-too-long
     '''List hyponyms for word
 
@@ -93,7 +92,7 @@ def hyponyms(word: str, keep_original: bool = True) -> List[str]:
         result = [word] + result
     return result[:]
 
-def hypernyms(word: str, keep_original: bool = True) -> List[str]:
+def hypernyms(word: str, keep_original: bool = True) -> list[str]:
     '''List hypernyms for word
 
     :param word: The word for which hyperyms should be looked up
@@ -120,7 +119,7 @@ def hypernyms(word: str, keep_original: bool = True) -> List[str]:
         result = [word] + result
     return result[:]
 
-def related(word: str, keep_original: bool = True) -> List[str]:
+def related(word: str, keep_original: bool = True) -> list[str]:
     # pylint: disable=line-too-long
     '''List all related words (synonyms, hypernyms, and hyponyms)
 

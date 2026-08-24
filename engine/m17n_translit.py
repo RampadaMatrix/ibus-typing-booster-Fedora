@@ -24,7 +24,7 @@ import ctypes
 import logging
 import re
 import sys
-from typing import Any, Dict, List, NamedTuple, Tuple
+from typing import Any, NamedTuple
 
 from gi import require_version
 
@@ -940,7 +940,7 @@ class TransliterationParts(NamedTuple):
                           For example in case of ja-anthy.mim,
                           this is 'aあ' before Henkan and changes
                           to '漢' in Henkan mode.
-    candidates: List[str] May contain a list of candidates if the
+    candidates: list[str] May contain a list of candidates if the
                           input method can produce multiple candidates.
     candidate_index: int  Index of the selected candidate.
                           0 if no candidate is selected.
@@ -957,7 +957,7 @@ class TransliterationParts(NamedTuple):
     preedit: str = ''
     cursor_pos: int = 0
     status: str = ''
-    candidates: List[str] = []
+    candidates: list[str] = []
     candidate_index: int = 0
     candidate_from: int = 0
     candidate_to: int = 0
@@ -1047,7 +1047,7 @@ class Transliterator:
 
     def transliterate_parts(
             self,
-            msymbol_list: List[str],
+            msymbol_list: list[str],
             ascii_digits: bool = False,
             reset: bool = False) -> TransliterationParts:
         # pylint: disable=line-too-long
@@ -1475,7 +1475,7 @@ class Transliterator:
         committed = ''
         committed_index = 0
         preedit = ''
-        candidates: List[str] = []
+        candidates: list[str] = []
         for index, symbol in enumerate(msymbol_list):
             symbol = self._convert_non_ascii_msymbol(symbol)
             _symbol = libm17n__msymbol(symbol.encode('utf-8')) # type: ignore
@@ -1688,7 +1688,7 @@ class Transliterator:
 
     def transliterate(
             self,
-            msymbol_list: List[str],
+            msymbol_list: list[str],
             ascii_digits: bool = False,
             reset: bool = False) -> str:
         '''Transliterate a list of Msymbol names
@@ -1776,7 +1776,7 @@ class Transliterator:
             msymbol_list, ascii_digits, reset)
         return transliteration_parts.committed + transliteration_parts.preedit
 
-    def get_variables(self) -> List[Tuple[str, str, str]]:
+    def get_variables(self) -> list[tuple[str, str, str]]:
         # pylint: disable=line-too-long
         '''
         Gets the optional variables of this transliterator input method
@@ -1794,7 +1794,7 @@ class Transliterator:
         [('prompt', 'Preedit prompt\\nPrompt string shown in the preedit area while typing hexadecimal numbers.', 'U+')]
         '''
         # pylint: enable=line-too-long
-        variables_list: List[Tuple[str, str, str]] = []
+        variables_list: list[tuple[str, str, str]] = []
         if self._dummy:
             return variables_list
         plist = libm17n__minput_get_variable( # type: ignore
@@ -1855,7 +1855,7 @@ class Transliterator:
             plist = libm17n__mplist_next(plist) # type: ignore
         return variables_list
 
-    def set_variables(self, variables: Dict[str, str]) -> None:
+    def set_variables(self, variables: dict[str, str]) -> None:
         '''
         Sets the optional variables of this transliterator input method
 

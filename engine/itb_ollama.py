@@ -33,11 +33,8 @@ from collections.abc import Generator
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     Optional,
-    Set,
     Union,
     cast,
 )
@@ -66,18 +63,18 @@ class ItbOllamaClient:
         self._server: Literal['ollama', 'ramalama', ''] = ''
         self._version = ''
         self._error = ''
-        self._ramalama_shortnames: Dict[str, str] = {}
+        self._ramalama_shortnames: dict[str, str] = {}
         try:
             self._client = httpx.Client(base_url=self._host, timeout=timeout)
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception('Failed to create httpx.Client: %s', error)
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Failed to create httpx.Client')
             self._client = None
         if self._client is None:
             return
         try:
             self._client.get('')
         except httpx.ConnectError as error:
-            LOGGER.error('Failed to connect to server: %s', error)
+            LOGGER.exception('Failed to connect to server')
             self._error = str(error)
             return
         resp = self._client.get('/api/version')
@@ -113,7 +110,7 @@ class ItbOllamaClient:
         '''Return the version number of the server'''
         return self._version
 
-    def models(self) -> Dict[str, Any]:
+    def models(self) -> dict[str, Any]:
         '''(Verbosely) list models available on the server.'''
         if self._client is None or self._server == '':
             return {}
@@ -128,18 +125,16 @@ class ItbOllamaClient:
             return {}
         if resp.json().get('data', []) is None:
             return {}
-        return cast(Dict[str, Any], resp.json())
+        return cast(dict[str, Any], resp.json())
 
-    def model_ids(self) -> Set[str]:
+    def model_ids(self) -> set[str]:
         '''Get set of all model ids available on the server'''
         return {model['id'] for model in self.models().get('data', [])}
 
     def is_available(self, model: str) -> bool:
         '''Check whether a model is available on the server'''
         available = [self.short_name(x) for x in self.model_ids()]
-        if self.short_name(model) in available:
-            return True
-        return False
+        return self.short_name(model) in available
 
     def short_name(self, model: str) -> str:
         '''Normalize a ollama or ramalama model name to the shortest version
@@ -165,7 +160,7 @@ class ItbOllamaClient:
     def pull(
         self,
         model: str,
-        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        progress_callback: Optional[Callable[[dict[str, Any]], None]] = None,
         stop_event: Optional[threading.Event] = None,
     ) -> bool:
         '''Pull a model with optional progress callback (streaming).'''
@@ -192,7 +187,7 @@ class ItbOllamaClient:
                     if 'error' in data:
                         return False
             return True
-        except Exception as error: # pylint: disable=broad-except
+        except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
             if progress_callback:
                 progress_callback({'error': str(error), 'status': 'error'})
         return False
@@ -200,9 +195,9 @@ class ItbOllamaClient:
     def chat(
         self,
         model: str,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         stream: bool = False,
-    ) -> Union[Generator[Dict[str, Any], None, None], Dict[str, Any]]:
+    ) -> Union[Generator[dict[str, Any], None, None], dict[str, Any]]:
         '''
         Send a chat request.
         - messages = [{'role': 'user', 'content': 'Hello'}]
@@ -215,14 +210,14 @@ class ItbOllamaClient:
         endpoint = '/v1/chat/completions'
         body = {'model': model, 'messages': messages, 'stream': stream}
         if stream:
-            def event_stream() -> Generator[Dict[str, Any], None, None]:
+            def event_stream() -> Generator[dict[str, Any], None, None]:
                 with client.stream('POST', endpoint, json=body) as resp:
                     resp.raise_for_status()
                     for line in resp.iter_lines():
                         if not line.strip():
                             continue
                         try:
-                            data = json.loads(line.lstrip('data:'))
+                            data = json.loads(line.removeprefix('data:'))
                             if isinstance(data, dict):
                                 yield data
                             else:
@@ -232,7 +227,7 @@ class ItbOllamaClient:
             return event_stream()
         resp = client.post(endpoint, json=body)
         resp.raise_for_status()
-        return cast(Dict[str, Any], resp.json())
+        return cast(dict[str, Any], resp.json())
 
     def close(self) -> None:
         '''Close the HTTP connection pool.'''
@@ -241,7 +236,7 @@ class ItbOllamaClient:
             self._client = None
 
 @functools.cache
-def get_ramalama_shortnames() -> Dict[str, str]:
+def get_ramalama_shortnames() -> dict[str, str]:
     '''Get the shortnames dictionary from `ramalama info`'''
     ramalama_binary = shutil.which('ramalama')
     if ramalama_binary:
@@ -253,11 +248,9 @@ def get_ramalama_shortnames() -> Dict[str, str]:
                 encoding='utf-8', check=True)
             data = json.loads(result.stdout.strip())
             shortnames = data.get('Shortnames', {})
-            return cast(Dict[str, str], shortnames.get('Names', {}))
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Exception when calling %s: %s',
-                ramalama_binary, error)
+            return cast(dict[str, str], shortnames.get('Names', {}))
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Exception when calling %s', ramalama_binary)
     return {}
 
 @functools.cache
@@ -270,10 +263,8 @@ def get_ramalama_version() -> str:
             version = subprocess.check_output(
                 [ramalama_binary, 'version'],
                 stderr=subprocess.STDOUT).decode('utf-8').strip()
-        except (subprocess.CalledProcessError, FileNotFoundError) as error:
-            LOGGER.exception(
-                'Exception when calling %s: %s',
-                ramalama_binary, error)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            LOGGER.exception('Exception when calling %s', ramalama_binary)
             return ''
     return re.sub(r'[^\d.]', '', version)
 

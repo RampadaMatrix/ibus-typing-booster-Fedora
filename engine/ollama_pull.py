@@ -29,7 +29,7 @@ import signal
 import sys
 import threading
 from types import FrameType
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from gi import require_version
 
@@ -119,8 +119,8 @@ class OllamaPullUI(Gtk.Window):  # type: ignore[misc]
         self._thread: Optional[threading.Thread] = None
         self._stop_event: threading.Event = threading.Event()
         self._status = ''
-        self._status_labels: List[Gtk.Label] = []
-        self._status_progress_bars: List[Gtk.ProgressBar] = []
+        self._status_labels: list[Gtk.Label] = []
+        self._status_progress_bars: list[Gtk.ProgressBar] = []
         title = f'📥 {self._model}'
         Gtk.Window.__init__(self, title=title)
         self.set_title(title)
@@ -184,12 +184,12 @@ class OllamaPullUI(Gtk.Window):  # type: ignore[misc]
             args=(self._model, self._pull_progress_idle_add, self._stop_event))
         self._thread.start()
 
-    def _pull_progress_idle_add(self, progress: Dict[str, Any]) -> None:
+    def _pull_progress_idle_add(self, progress: dict[str, Any]) -> None:
         '''Schedule an update of the progress of pulling the ollama model'''
         GLib.idle_add(lambda:
                       self._pull_progress(progress))
 
-    def _pull_progress(self, progress: Dict[str, Any]) -> None:
+    def _pull_progress(self, progress: dict[str, Any]) -> None:
         '''Show the progress of pulling the ollama model'''
         error = progress.get('error', None)
         total = progress.get('total', None)

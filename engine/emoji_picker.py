@@ -37,7 +37,7 @@ import time
 import unicodedata
 from collections.abc import Iterable
 from types import FrameType
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from gi import require_version
 
@@ -385,7 +385,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
             emoji_unicode_min=self._emoji_unicode_min,
             emoji_unicode_max=self._emoji_unicode_max,
             variation_selector='emoji')
-        self._gettext_translations: Dict[str, Any] = {}
+        self._gettext_translations: dict[str, Any] = {}
         for language in itb_util_core.expand_languages(self._languages):
             mo_file = gettext.find(DOMAINNAME, languages=[language])
             if (mo_file
@@ -405,7 +405,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
             else:
                 self._gettext_translations[language] = None
 
-        self._currently_selected_label: Optional[Tuple[str, str, str]] = None
+        self._currently_selected_label: Optional[tuple[str, str, str]] = None
         self._query_string = ''
         self._emoji_selected_popover: Optional[Gtk.Popover] = None
         self._emoji_info_popover: Optional[Gtk.Popover] = None
@@ -568,7 +568,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
             None,
             [self._recently_used_label, '', '', self._recently_used_label])
 
-        self._recently_used_emoji: Dict[str, Dict[str, float]] = {}
+        self._recently_used_emoji: dict[str, dict[str, float]] = {}
         self._recently_used_emoji_file = os.path.join(
             itb_util_core.xdg_save_data_path('emoji-picker'),
             'recently-used')
@@ -721,8 +721,8 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
     @classmethod
     def _sort_labels(
             cls,
-            labels: Dict[str, List[str]],
-            language: str) -> List[str]:
+            labels: dict[str, list[str]],
+            language: str) -> list[str]:
         return sorted(
             labels,
             key=lambda x: (
@@ -746,7 +746,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
             return str(self._gettext_translations[language].gettext(key))
         return key
 
-    def _emoji_descriptions(self, emoji: str) -> List[str]:
+    def _emoji_descriptions(self, emoji: str) -> list[str]:
         '''
         Return a description of the emoji
 
@@ -1066,7 +1066,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
             options_file.write(repr(options_dict))
             options_file.write('\n')
 
-    def _sorted_recently_used(self) -> List[str]:
+    def _sorted_recently_used(self) -> list[str]:
         '''
         Return a sorted list of recently used emoji
         '''
@@ -1687,7 +1687,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
         return True
 
     def _parse_emoji_and_name_from_text( # pylint: disable=no-self-use
-            self, text: str) -> Tuple[str, str]:
+            self, text: str) -> tuple[str, str]:
         '''
         Parse the emoji and its name out of the text of a label
 
@@ -2197,7 +2197,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
         self._save_options()
         GLib.idle_add(self._change_flowbox_font)
 
-    def _list_font_names(self) -> List[str]:
+    def _list_font_names(self) -> list[str]:
         '''
         Returns a list of font names available on the system
         '''
@@ -2395,7 +2395,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
         self._popup_manager.popup(popover, kind=PopupKind.FONT_SELECTION)
         search_entry.grab_focus()
 
-def get_languages() -> List[str]:
+def get_languages() -> list[str]:
     '''
     Return the list of languages.
 
