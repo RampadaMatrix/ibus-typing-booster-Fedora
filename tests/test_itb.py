@@ -543,6 +543,19 @@ class ItbTestCase(unittest.TestCase):
         self.assertEqual(self.engine.mock_preedit_text, '')
         self.assertEqual(self.engine.mock_committed_text, 'अक')
 
+    def test_hi_itrans_commit_finalized_form_with_backspace_at_end_of_preedit(self) -> None:
+        ''' https://github.com/mike-fabian/ibus-typing-booster/issues/923 '''
+        self.engine.set_current_imes(
+            ['hi-itrans'], update_gsettings=False)
+        self.engine.set_show_final_form(True)
+        self.engine.do_process_key_event(IBus.KEY_k, 0, 0)
+        self.assertEqual(self.engine.mock_preedit_text, 'क')
+        self.assertEqual(self.engine.mock_committed_text, '')
+        self.engine.do_process_key_event(IBus.KEY_Left, 0, 0)
+        self.engine.do_process_key_event(IBus.KEY_BackSpace, 0, 0)
+        self.assertEqual(self.engine.mock_preedit_text, '')
+        self.assertEqual(self.engine.mock_committed_text, '\x08क')
+
     def test_hi_itrans_commit_to_preedit(self) -> None:
         ''' https://github.com/mike-fabian/ibus-typing-booster/issues/457
         hi-itrans uses S-C-Return as a commit-key.
