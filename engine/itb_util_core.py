@@ -33,13 +33,9 @@ from typing import Union
 from typing import Iterable
 from typing import Pattern
 from typing import TYPE_CHECKING
-# pylint: disable=wrong-import-position
-import sys
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from typing import Literal
 from enum import IntFlag
+import sys
 import os
 import functools
 import collections
@@ -57,6 +53,7 @@ import ctypes.util
 import xml.etree.ElementTree
 from dataclasses import dataclass
 from collections import defaultdict
+# pylint: disable=wrong-import-position
 from gi import require_version
 require_version('IBus', '1.0')
 from gi.repository import IBus  # ty: ignore[unresolved-import]
