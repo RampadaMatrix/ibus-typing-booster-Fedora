@@ -21,27 +21,21 @@
 Unicode characters.
 
 '''
-from types import ModuleType
-from typing import Any
-from typing import List
-from typing import Tuple
-from typing import Dict
-from typing import Set
-from typing import Optional
-from typing import Iterable
-from typing import Callable
-from typing import TextIO
-import os
-import sys
-import re
 import functools
-import itertools
-import gzip
-import json
-import unicodedata
-import html
-import logging
 import gettext
+import gzip
+import html
+import itertools
+import json
+import logging
+import os
+import re
+import sys
+import unicodedata
+from collections.abc import Iterable
+from types import ModuleType
+from typing import Any, Callable, Dict, List, Optional, Set, TextIO, Tuple
+
 import itb_util_core
 
 DOMAINNAME: str = 'ibus-typing-booster'
@@ -86,7 +80,7 @@ except ImportError:
     enchant = None
 
 try:
-    import pykakasi as _pykakasi # type: ignore[import-not-found]  # ty: ignore[unresolved-import]
+    import pykakasi as _pykakasi  # type: ignore[import-not-found]  # ty: ignore[unresolved-import]
 except ImportError:
     pykakasi = None  # pylint: disable=invalid-name
     KAKASI_INSTANCE: Optional[Any] = None
@@ -433,19 +427,10 @@ def find_cldr_annotation_path(language: str) -> str:
             return os.path.abspath(path)
     return ''
 
-# @functools.cache is available only in Python >= 3.9.
-#
-# Python >= 3.9 is not available on RHEL8, not yet on openSUSE
-# Tumbleweed (2021-22-29), ...
-#
-# But @functools.lru_cache(maxsize=None) is the same and it is
-# available for Python >= 3.2, that means it should be available
-# everywhere.
-#
 # Many keywords are of course shared by many emoji, therefore the
 # query string is often matched against labels already matched
 # previously. Caching previous matches speeds it up quite a bit.
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _match_classic(label: str, match_string: str) -> float:
     '''Matches a label from the emoji data against the query string.'''
     label = itb_util_core.remove_accents(label.lower())
@@ -494,14 +479,14 @@ def _match_classic(label: str, match_string: str) -> float:
             tmp_no_spaces = tmp_no_spaces[:match_start] + tmp_no_spaces[match_start + len(word):]
     return total_score
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _match_rapidfuzz(label: str, match_string: str) -> float:
     '''Matches a label from the emoji data against the query string using rapidfuzz.'''
     label = itb_util_core.remove_accents(label.lower())
     assert rapidfuzz is not None
     return float(rapidfuzz.fuzz.token_set_ratio(label, match_string))
 
-class EmojiMatcher():
+class EmojiMatcher:
     '''A class to find Emoji which best match a query string'''
 
     def __init__(self, languages: Iterable[str] = ('en_US',),
@@ -546,7 +531,7 @@ class EmojiMatcher():
                 try:
                     self._gettext_translations[language] = gettext.translation(
                         DOMAINNAME, languages=[language])
-                except (OSError, ):
+                except OSError:
                     self._gettext_translations[language] = None
             else:
                 self._gettext_translations[language] = None
@@ -842,7 +827,7 @@ class EmojiMatcher():
                         for name in names.split(','):
                             self._add_to_emoji_dict(
                                 emoji_dict_key, 'names', [name.strip()])
-        except (OSError, IOError) as error:
+        except OSError as error:
             LOGGER.exception(
                 'Error while loading NamesList from %s: %s: %s',
                 path, error.__class__.__name__, error)
@@ -888,7 +873,7 @@ class EmojiMatcher():
                                 self._add_to_emoji_dict(
                                     emoji_dict_key, 'keywords',
                                     [description.strip('()')])
-        except (OSError, IOError) as error:
+        except OSError as error:
             LOGGER.exception(
                 'Error while loading Blocks from %s: %s: %s',
                 path, error.__class__.__name__, error)
@@ -922,7 +907,7 @@ class EmojiMatcher():
                             if emoji_dict_key in self._emoji_dict:
                                 self._add_to_emoji_dict(
                                     emoji_dict_key, 'block', block_name)
-        except (OSError, IOError) as error:
+        except OSError as error:
             LOGGER.exception(
                 'Error while loading Blocks from %s: %s: %s',
                 path, error.__class__.__name__, error)
@@ -2091,7 +2076,7 @@ class EmojiMatcher():
                 if not name:
                     try:
                         name = unicodedata.name(char).lower()
-                    except (ValueError,):
+                    except ValueError:
                         pass
                 if name:
                     name = ' ' + name
@@ -2099,7 +2084,7 @@ class EmojiMatcher():
                     phrase=char,
                     user_freq=self._good_match_score * 10.0,
                     comment=f'U+{query_string.upper()}{name}'))
-        except (ValueError,):
+        except ValueError:
             pass
 
         sorted_candidates = sorted(
@@ -2135,7 +2120,7 @@ class EmojiMatcher():
         fields = ['names', 'ucategories', 'categories', 'keywords']
         all_labels = itertools.chain(
             itertools.chain.from_iterable(
-                (emoji_value.get(field, []) for field in fields)),
+                emoji_value.get(field, []) for field in fields),
             [emoji_value.get('block', '')])
         return {
             itb_util_core.remove_accents(word)
@@ -3035,8 +3020,8 @@ def main() -> None:
     LOGGER.addHandler(log_handler)
 
     if BENCHMARK:
-        import cProfile # pylint: disable=import-outside-toplevel
-        import pstats # pylint: disable=import-outside-toplevel
+        import cProfile  # pylint: disable=import-outside-toplevel
+        import pstats  # pylint: disable=import-outside-toplevel
         profile = cProfile.Profile()
         profile.enable()
 
@@ -3053,7 +3038,7 @@ def main() -> None:
     elif enchant is None:
         LOGGER.info('Skipping doctests because enchant is not available.')
     else:
-        import doctest # pylint: disable=import-outside-toplevel
+        import doctest  # pylint: disable=import-outside-toplevel
         # Set the domain name to something invalid to avoid using
         # the translations for the doctest tests. Translations may
         # make the tests fail just because some translations are

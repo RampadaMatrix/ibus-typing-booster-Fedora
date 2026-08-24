@@ -27,21 +27,23 @@ Pango, ...
 Instead, let the main application decide which version to load.  This
 helper module should work with whichever version is loaded.
 '''
+import gettext
+import html
+import logging
+from collections.abc import Iterable
+from enum import Enum, auto
 from typing import (
-    List,
-    Tuple,
-    Iterable,
-    Optional,
-    Callable,
     Any,
+    Callable,
+    List,
+    Optional,
+    Tuple,
     cast,
     overload,
 )
-import html
-import logging
-import gettext
-from enum import Enum, auto
+
 from gi import require_version
+
 require_version('GLib', '2.0')
 require_version('Gio', '2.0')
 # pylint: disable=wrong-import-position
@@ -50,6 +52,7 @@ from gi.repository import Gio # type: ignore
 from gi.repository import GdkPixbuf # type: ignore
 from gi.repository import Pango # type: ignore
 from itb_gtk import Gdk, Gtk, GTK_MAJOR, GTK_VERSION
+
 # pylint: enable=wrong-import-position
 ResponseCallback = Callable[[], None]
 ClickCallback = Callable[[Gtk.Widget, int, Any], None]
@@ -847,7 +850,7 @@ class FakeEventKey: # pylint: disable=too-few-public-methods
     def __init__(self, keyval: int, keycode: int, state: 'Gdk.ModifierType') -> None:
         self.keyval: int = keyval
         self.hardware_keycode: int = keycode
-        self.state: 'Gdk.ModifierType' = state
+        self.state: Gdk.ModifierType = state
         uc: int = Gdk.keyval_to_unicode(keyval)
         self.string: str = chr(uc) if uc else ''
         self.time: int = 0

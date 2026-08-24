@@ -26,16 +26,20 @@ same process. Therefore, this helper runs as a separate subprocess to
 retrieve the primary selection text using GTK 4, even when the main program
 is using GTK 3.
 '''
-from typing import Optional
-import sys
 import os
+import sys
+from typing import Optional
+
 from gi import require_version
+
 # pylint: disable=wrong-import-position
 require_version('GLib', '2.0')
 require_version('Gio', '2.0')
-from gi.repository import Gio, GLib # type: ignore
+from gi.repository import Gio, GLib  # type: ignore
+
 os.environ['ITB_GTK_VERSION'] = '4'
 from itb_gtk import Gdk, Gtk
+
 # pylint: enable=wrong-import-position
 
 class ClipboardApp(Gtk.Application): # type: ignore[misc]

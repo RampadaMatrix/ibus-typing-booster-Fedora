@@ -20,20 +20,20 @@
 '''A module to find out which fonts are used by pango to render a string
 '''
 
-from typing import List
-from typing import Tuple
-from typing import Dict
-from typing import Any
-import sys
-import re
-import subprocess
-import shutil
 import functools
 import logging
+import re
+import shutil
+import subprocess
+import sys
+from typing import Any, Dict, List, Tuple
+
 from gi import require_version
+
 # pylint: disable=wrong-import-position
 require_version('Pango', '1.0')
-from gi.repository import Pango # type: ignore
+from gi.repository import Pango  # type: ignore
+
 # pylint: enable=wrong-import-position
 from itb_gtk import Gtk
 
@@ -65,7 +65,7 @@ def _get_global_pango_layout() -> Pango.Layout:
 # available for Python >= 3.2, that means it should be available
 # everywhere.
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_font_file(family: str) -> str:
     '''Use Fontconfig to find the font file path for a given font family
 
@@ -102,7 +102,7 @@ def get_font_file(family: str) -> str:
                        fc_match_binary, error.__class__.__name__, error)
     return path
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_font_lang(family: str) -> str:
     '''Use Fontconfig to find the supported languages by font family matched with fc-match
 
@@ -132,7 +132,7 @@ def get_font_lang(family: str) -> str:
                        fc_match_binary, error.__class__.__name__, error)
     return lang
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_font_version(font_file: str) -> str:
     '''Use otfinfo to get the font version from a font file
 
@@ -167,7 +167,7 @@ def get_font_version(font_file: str) -> str:
                        otfinfo_binary, error.__class__.__name__, error)
     return version
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_font_tables(font_file: str) -> List[str]:
     # pylint: disable=line-too-long
     '''Use otfinfo to get the OpenType tables in a font file

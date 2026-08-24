@@ -32,9 +32,11 @@ it using:
 
 '''
 
-from typing import List
 import sys
-import nltk # type: ignore[import-untyped]
+from typing import List
+
+import nltk  # type: ignore[import-untyped]
+
 
 def synonyms(word: str, keep_original: bool = True) -> List[str]:
     '''List synonyms for word
@@ -153,7 +155,7 @@ def _init() -> None:
     '''
     try:
         nltk.corpus.wordnet.synsets('car')
-    except (LookupError,) as error:
+    except LookupError as error:
         print(f'{error.__class__.__name__}: {error}')
         raise LookupError from error
     except Exception as error:
@@ -186,12 +188,12 @@ def main() -> None:
     runs some tests and prints profiling data.
     '''
     if BENCHMARK:
-        import cProfile # pylint: disable=import-outside-toplevel
-        import pstats # pylint: disable=import-outside-toplevel
+        import cProfile  # pylint: disable=import-outside-toplevel
+        import pstats  # pylint: disable=import-outside-toplevel
         profile = cProfile.Profile()
         profile.enable()
 
-    import doctest # pylint: disable=import-outside-toplevel
+    import doctest  # pylint: disable=import-outside-toplevel
     _init()
     (failed, _attempted) = doctest.testmod()
 

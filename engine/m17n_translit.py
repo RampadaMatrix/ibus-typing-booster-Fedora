@@ -20,21 +20,18 @@
 '''A module to do transliteration using m17n-lib.
 '''
 
-from typing import Dict
-from typing import List
-from typing import Tuple
-from typing import NamedTuple
-from typing import Any
-import sys
-import re
 import ctypes
 import logging
+import re
+import sys
+from typing import Any, Dict, List, NamedTuple, Tuple
+
 from gi import require_version
+
 # pylint: disable=wrong-import-position
 require_version('IBus', '1.0')
-from gi.repository import IBus  # ty: ignore[unresolved-import]
 # pylint: enable=wrong-import-position
-import itb_util_core
+from gi.repository import IBus  # ty: ignore[unresolved-import]
 
 LOGGER = logging.getLogger('ibus-typing-booster')
 

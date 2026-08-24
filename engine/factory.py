@@ -20,24 +20,25 @@
 '''
 TypingBoosterEngine Factory
 '''
-from typing import Dict
-from typing import Optional
-import re
-import os
-import logging
 import gettext
+import logging
+import os
+import re
+from typing import Dict, Optional
+
 from gi import require_version
+
 # pylint: disable=wrong-import-position
 require_version('IBus', '1.0')
 from gi.repository import IBus  # ty: ignore[unresolved-import]
 # pylint: enable=wrong-import-position
 import hunspell_table
-import tabsqlitedb
 import itb_util_core
+import tabsqlitedb
 
 LOGGER = logging.getLogger('ibus-typing-booster')
 
-DEBUG_LEVEL = int(0)
+DEBUG_LEVEL = 0
 
 DOMAINNAME = 'ibus-typing-booster'
 
@@ -60,7 +61,7 @@ class EngineFactory(IBus.Factory):
             DEBUG_LEVEL = int(
                 str(os.getenv('IBUS_TYPING_BOOSTER_DEBUG_LEVEL')))
         except (TypeError, ValueError):
-            DEBUG_LEVEL = int(0)
+            DEBUG_LEVEL = 0
         if DEBUG_LEVEL > 1:
             LOGGER.debug('EngineFactory.__init__(bus=%s)\n', bus)
         self.database: Optional[tabsqlitedb.TabSqliteDb] = None

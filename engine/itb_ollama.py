@@ -20,25 +20,28 @@
 A module with utilites to use ollama
 '''
 
-from typing import Callable
-from typing import Optional
-from typing import Dict
-from typing import List
-from typing import Generator
-from typing import Set
-from typing import Union
-from typing import Any
-from typing import cast
-from typing import Literal
-import sys
+import functools
+import json
+import logging
 import os
 import re
-import json
-import threading
-import logging
 import shutil
 import subprocess
-import functools
+import sys
+import threading
+from collections.abc import Generator
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Union,
+    cast,
+)
+
 import httpx
 
 LOGGER = logging.getLogger('ibus-typing-booster')
@@ -147,8 +150,7 @@ class ItbOllamaClient:
         'hf://ggml-org/gemma-3-4b-it-GGUF' -> 'gemma3'
         'ggml-org/gemma-3-4b-it-GGUF' -> 'gemma3'
         '''
-        if model.endswith(':latest'):
-            model = model[:-7]
+        model = model.removesuffix(':latest')
         if self._server == 'ramalama':
             if model in self._ramalama_shortnames:
                 return model
@@ -238,7 +240,7 @@ class ItbOllamaClient:
             self._client.close()
             self._client = None
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_ramalama_shortnames() -> Dict[str, str]:
     '''Get the shortnames dictionary from `ramalama info`'''
     ramalama_binary = shutil.which('ramalama')
@@ -258,7 +260,7 @@ def get_ramalama_shortnames() -> Dict[str, str]:
                 ramalama_binary, error)
     return {}
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_ramalama_version() -> str:
     '''Get the ramalama version from `ramalama version`'''
     ramalama_binary = shutil.which('ramalama')

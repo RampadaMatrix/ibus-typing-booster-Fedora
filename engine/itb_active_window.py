@@ -66,16 +66,14 @@ seen in the terminal shows correctly which window is currently active
 (This works only with AT-SPI).
 
 '''
-from types import ModuleType
-from typing import Optional
-from typing import Any
-from typing import Tuple
-import sys
-import os
-import subprocess
-import shutil
-import threading
 import logging
+import os
+import shutil
+import subprocess
+import sys
+import threading
+from types import ModuleType
+from typing import Any, Optional, Tuple
 
 pyatspi: Optional[ModuleType]
 try:

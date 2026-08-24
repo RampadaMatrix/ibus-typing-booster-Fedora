@@ -22,23 +22,20 @@
 hunspell dictonaries.
 
 '''
-from types import ModuleType
-from typing import Optional
-from typing import Dict
-from typing import Tuple
-from typing import List
-from typing import Iterable
-from typing import Type
+import functools
+import logging
 import os
 import sys
 import unicodedata
-import functools
-import logging
+from collections.abc import Iterable
+from types import ModuleType
+from typing import Dict, List, Optional, Tuple, Type
+
 import itb_util_core
 
 LOGGER = logging.getLogger('ibus-typing-booster')
 
-DEBUG_LEVEL = int(0)
+DEBUG_LEVEL = 0
 
 enchant: Optional[ModuleType]
 try:
@@ -70,7 +67,7 @@ except ImportError:
 MAX_WORDS = 100
 
 # pylint: disable=attribute-defined-outside-init
-class Dictionary():
+class Dictionary:
     '''A class to hold a hunspell dictionary'''
     _instances: Dict[Tuple[Type['Dictionary'], str], 'Dictionary'] = {}
 
@@ -96,7 +93,7 @@ class Dictionary():
         self.max_word_len = 0 # maximum length of words in this dictionary
         self.enchant_dict = None
         self.pyhunspell_object = None
-        self.voikko: Optional['_libvoikko.Voikko'] = None
+        self.voikko: Optional[_libvoikko.Voikko] = None
         if self.name != 'None':
             self.load_dictionary()
 
@@ -132,7 +129,7 @@ class Dictionary():
                     return
                 try:
                     self.voikko = libvoikko.Voikko('fi')
-                except (libvoikko.VoikkoException,) as error:
+                except libvoikko.VoikkoException as error:
                     LOGGER.warning('Init of voikko failed: %s: %s',
                                    error.__class__.__name__, error)
                     self.voikko = None
@@ -380,7 +377,7 @@ class Hunspell:
             DEBUG_LEVEL = int(
                 str(os.getenv('IBUS_TYPING_BOOSTER_DEBUG_LEVEL')))
         except (TypeError, ValueError):
-            DEBUG_LEVEL = int(0)
+            DEBUG_LEVEL = 0
         if DEBUG_LEVEL > 1:
             if dictionary_names:
                 LOGGER.debug(
@@ -803,12 +800,12 @@ def main() -> None:
     LOGGER.addHandler(log_handler)
 
     if BENCHMARK:
-        import cProfile # pylint: disable=import-outside-toplevel
-        import pstats # pylint: disable=import-outside-toplevel
+        import cProfile  # pylint: disable=import-outside-toplevel
+        import pstats  # pylint: disable=import-outside-toplevel
         profile = cProfile.Profile()
         profile.enable()
 
-    import doctest # pylint: disable=import-outside-toplevel
+    import doctest  # pylint: disable=import-outside-toplevel
     (failed, _attempted) = doctest.testmod()
 
     if BENCHMARK:

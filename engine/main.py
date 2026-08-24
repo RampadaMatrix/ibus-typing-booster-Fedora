@@ -20,28 +20,25 @@
 '''
 Main program of ibus-typing-booster
 '''
-from typing import Any
-from typing import Union
-from typing import Type
-from typing import Optional
-import types
-import os
-import sys
 import argparse
-import re
 import logging
 import logging.handlers
-from signal import signal, SIGTERM, SIGINT
+import os
+import re
+import sys
+import types
+from signal import SIGINT, SIGTERM, signal
+from typing import Any, Optional, Type, Union
+
 # pylint: disable=wrong-import-position
 from gi import require_version
 require_version('IBus', '1.0')
 from gi.repository import IBus  # ty: ignore[unresolved-import]
 require_version('Gio', '2.0')
-from gi.repository import Gio # type: ignore
+from gi.repository import Gio  # type: ignore
 require_version('GLib', '2.0')
-from gi.repository import GLib # type: ignore
+from gi.repository import GLib  # type: ignore
 # pylint: enable=wrong-import-position
-
 import itb_util_core
 import itb_version
 
@@ -130,8 +127,8 @@ _ARGS = parse_args()
 
 if _ARGS.profile:
     import cProfile
-    import pstats
     import io
+    import pstats
     _PROFILE = cProfile.Profile()
 
 if _ARGS.xml:

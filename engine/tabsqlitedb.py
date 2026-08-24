@@ -19,27 +19,23 @@
 Module for ibus-typing-booster to access the sqlite3 databases
 '''
 
-from typing import Dict
-from typing import List
-from typing import Tuple
-from typing import Optional
-from typing import Any
-from typing import TextIO
-from typing import Iterator
-import os
-import unicodedata
-from contextlib import contextmanager
-import sqlite3
-import time
-import re
 import gzip
 import logging
-import itb_util_core
+import os
+import re
+import sqlite3
+import time
+import unicodedata
+from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Any, Dict, List, Optional, TextIO, Tuple
+
 import hunspell_suggest
+import itb_util_core
 
 LOGGER = logging.getLogger('ibus-typing-booster')
 
-DEBUG_LEVEL = int(0)
+DEBUG_LEVEL = 0
 
 USER_DATABASE_VERSION = '0.65'
 
@@ -63,7 +59,7 @@ class TabSqliteDb:
         try:
             DEBUG_LEVEL = int(str(os.getenv('IBUS_TYPING_BOOSTER_DEBUG_LEVEL')))
         except (TypeError, ValueError):
-            DEBUG_LEVEL = int(0)
+            DEBUG_LEVEL = 0
         if DEBUG_LEVEL > 1:
             LOGGER.debug(
                 'TabSqliteDb.__init__(user_db_file = %s)', user_db_file)

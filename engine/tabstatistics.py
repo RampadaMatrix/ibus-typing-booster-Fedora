@@ -21,16 +21,14 @@ Utility to inspec the user database of Typing Booster and print
 some information about the contents
 '''
 
-from typing import List
-from typing import Tuple
-from typing import Dict
-from typing import Any
-import os
-import time
-import sqlite3
 import argparse
+import os
+import sqlite3
+import time
+from typing import Any, Dict, List, Tuple
 
 import itb_util_core
+
 
 def parse_args() -> Any:
     '''
@@ -58,7 +56,7 @@ def parse_args() -> Any:
         dest='max_rows',
         type=int,
         action='store',
-        default=int(50000),
+        default=50000,
         help=('Maximum number of rows to keep in the database. '
               'default: "%(default)s"'))
     parser.add_argument(

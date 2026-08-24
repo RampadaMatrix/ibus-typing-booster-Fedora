@@ -21,48 +21,51 @@
 '''
 This file implements the ibus engine for ibus-typing-booster
 '''
-from types import ModuleType
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Set
-from typing import Tuple
-from typing import Union
-from typing import Optional
-from typing import Iterable
-from typing import Callable
-from typing import TYPE_CHECKING
-from typing import Literal
-import sys
-import unicodedata
-import os
-import fnmatch
 import ast
-import time
 import copy
 import enum
-import logging
-import threading
-import subprocess
-import textwrap
+import fnmatch
 import gettext
+import logging
+import os
+import subprocess
+import sys
+import textwrap
+import threading
+import time
+import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass, field
+from types import ModuleType
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
+
 # pylint: disable=wrong-import-position
 from gi import require_version
 require_version('IBus', '1.0')
 from gi.repository import IBus  # ty: ignore[unresolved-import]
 require_version('Gio', '2.0')
-from gi.repository import Gio # type: ignore
+from gi.repository import Gio  # type: ignore
 require_version('GLib', '2.0')
-from gi.repository import GLib # type: ignore
-# pylint: enable=wrong-import-position
-import m17n_translit
+from gi.repository import GLib  # type: ignore
+import itb_active_window
+import itb_emoji
+import itb_sound
 import itb_util_core
 import itb_util_gui
-import itb_active_window
-import itb_sound
-import itb_emoji
 import itb_version
+import m17n_translit
+# pylint: enable=wrong-import-position
 
 itb_ollama: Optional[ModuleType]
 _itb_ollama_import_error: Optional[Exception]
@@ -98,7 +101,7 @@ except (ImportError, LookupError, ValueError):
     itb_nltk = None
 
 if TYPE_CHECKING:
-    from google.cloud import speech as _speech # type: ignore  # noqa: F401
+    from google.cloud import speech as _speech  # type: ignore  # noqa: F401
 try:
     from google.cloud import speech as _speech_runtime  # ty: ignore[unresolved-import]
 except ImportError:
@@ -335,7 +338,7 @@ class TypingBoosterLookupTable:
         # of the table is reached.  I think this is confusing for
         # ibus-typing-booster, it should be set to False.
         self._ibus_lookup_table.set_round(False)
-        for index in range(0, 9):
+        for index in range(9):
             label = str(index + 1)
             self._ibus_lookup_table.set_label(
                 index, IBus.Text.new_from_string(label))
@@ -670,7 +673,7 @@ class TypingBoosterEngine(IBus.Engine):
             'aichatenable']['user']
         self._ai_system_message: str = self._settings_dict[
             'aisystemmessage']['user']
-        self._ollama_client: Optional['ItbOllamaClient'] = None
+        self._ollama_client: Optional[ItbOllamaClient] = None
         self._ollama_server_label = '🦙'
         self._ollama_model: str = self._settings_dict[
             'ollamamodel']['user']
@@ -1881,7 +1884,7 @@ class TypingBoosterEngine(IBus.Engine):
                         '\u2029', repr('\u2029'))
         if self._debug_level > 1 and not self.has_osk:
             # Show frequency information for debugging
-            phrase += f' {str(user_freq)}'
+            phrase += f' {user_freq!s}'
             attrs.append(IBus.attr_foreground_new(
                 itb_util_gui.color_string_to_argb('HotPink'),
                 len(phrase) - len(str(user_freq)),
@@ -2613,7 +2616,7 @@ class TypingBoosterEngine(IBus.Engine):
         self.dictionary_properties = {}
         current_dictionaries = self.get_dictionary_names()
         current_dictionaries_max = itb_util_core.MAXIMUM_NUMBER_OF_DICTIONARIES
-        for i in range(0, current_dictionaries_max):
+        for i in range(current_dictionaries_max):
             if i < len(current_dictionaries):
                 self.dictionary_properties[
                     'Dictionary.' + str(i)
@@ -2645,7 +2648,7 @@ class TypingBoosterEngine(IBus.Engine):
         self.preedit_ime_properties = {}
         current_imes = self.get_current_imes()
         current_imes_max = itb_util_core.MAXIMUM_NUMBER_OF_INPUT_METHODS
-        for i in range(0, current_imes_max):
+        for i in range(current_imes_max):
             if i < len(current_imes):
                 self.preedit_ime_properties[
                     'PreeditIme.' + str(i)
@@ -3840,7 +3843,7 @@ class TypingBoosterEngine(IBus.Engine):
                 for hyponym in itb_nltk.hyponyms(phrase, keep_original=False):
                     related_candidates.append(itb_util_core.PredictionCandidate(
                         phrase=hyponym, user_freq=0, comment='[hyponym]'))
-            except (LookupError,) as error:
+            except LookupError as error:
                 LOGGER.exception(
                     'Exception when trying to use nltk: %s: %s',
                      error.__class__.__name__, error)
@@ -5143,8 +5146,7 @@ class TypingBoosterEngine(IBus.Engine):
         trans = self._transliterators[preedit_ime]
         input_phrase = trans.transliterate(
             self._typed_string + [' '], ascii_digits=self._ascii_digits)
-        if input_phrase.endswith(' '):
-            input_phrase = input_phrase[:-1]
+        input_phrase = input_phrase.removesuffix(' ')
         input_phrase = self._case_modes[
             self._current_case_mode]['function'](input_phrase)
         if (self._lookup_table.get_number_of_candidates()
@@ -5175,7 +5177,7 @@ class TypingBoosterEngine(IBus.Engine):
         self._clear_input_and_update_ui()
         if not candidate_was_selected:
             # cursor needs to be corrected leftwards:
-            for _ in range(0, left_steps):
+            for _ in range(left_steps):
                 self._forward_generated_key_event(IBus.KEY_Left)
 
     def set_input_mode(
@@ -8665,8 +8667,7 @@ class TypingBoosterEngine(IBus.Engine):
                 continue
             current_line = line
             break
-        if current_line.endswith('\n'):
-            current_line = current_line[:-1]
+        current_line = current_line.removesuffix('\n')
         LOGGER.debug(
             'current_line=%r len(current_line)=%d '
             'cursor_pos_in_current_line=%d ',
@@ -9095,7 +9096,7 @@ class TypingBoosterEngine(IBus.Engine):
                 command_function_name = f'_command_{command}'
                 try:
                     command_function = getattr(self, command_function_name)
-                except (AttributeError,):
+                except AttributeError:
                     LOGGER.exception('There is no function %s',
                                      command_function_name)
                     if hotkey_removed_from_compose_sequence:
@@ -10903,7 +10904,7 @@ class TypingBoosterEngine(IBus.Engine):
             time.sleep(self._ibus_event_sleep_seconds)
             if not candidate_was_selected:
                 # cursor needs to be corrected leftwards:
-                for _ in range(0, left_steps):
+                for _ in range(left_steps):
                     self._forward_generated_key_event(IBus.KEY_Left)
             return False
 
@@ -11139,7 +11140,7 @@ class TypingBoosterEngine(IBus.Engine):
             elif isinstance(current_value, int):
                 try:
                     new_value = int(value)
-                except (ValueError,) as error:
+                except ValueError as error:
                     LOGGER.exception(
                         'Exception converting autosettings value to integer: '
                         '%s: %s',
@@ -11148,7 +11149,7 @@ class TypingBoosterEngine(IBus.Engine):
             elif isinstance(current_value, float):
                 try:
                     new_value = float(value)
-                except (ValueError,) as error:
+                except ValueError as error:
                     LOGGER.exception(
                         'Exception converting autosettings value to integer: '
                         '%s: %s',

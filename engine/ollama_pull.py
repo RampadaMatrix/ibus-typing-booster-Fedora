@@ -20,25 +20,23 @@
 A module with utilites to use ollama
 '''
 
-from typing import Optional
-from typing import List
-from typing import Dict
-from typing import Union
-from typing import Any
-from types import FrameType
-import sys
+import argparse
+import gettext
+import locale
+import logging
 import os
 import signal
-import argparse
-import locale
+import sys
 import threading
-import gettext
-import logging
+from types import FrameType
+from typing import Any, Dict, List, Optional, Union
 
 from gi import require_version
+
 # pylint: disable=wrong-import-position
 require_version('GLib', '2.0')
-from gi.repository import GLib # type: ignore
+from gi.repository import GLib  # type: ignore
+
 # pylint: enable=wrong-import-position
 
 # set_prgname before importing other modules to show the name in warning
@@ -46,13 +44,13 @@ from gi.repository import GLib # type: ignore
 GLib.set_application_name('Ollama Pull')
 
 import itb_ollama
-from itb_gtk import Gtk, GTK_MAJOR
 from g_compat_helpers import (
+    CompatButton,
     add_child,
     set_border_width,
     show_all,
-    CompatButton,
 )
+from itb_gtk import GTK_MAJOR, Gtk
 
 LOGGER = logging.getLogger('ibus-typing-booster')
 

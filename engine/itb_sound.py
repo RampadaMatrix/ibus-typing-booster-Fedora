@@ -19,20 +19,17 @@
 '''
 Module to play simple error sounds
 '''
-from types import ModuleType
-from typing import Optional
-from typing import Any
-from typing import TYPE_CHECKING
-from typing import cast
-import sys
-import os
 import logging
-import threading
-import wave
+import mimetypes
+import os
 import shutil
 import subprocess
-import mimetypes
+import sys
+import threading
 import time
+import wave
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 LOGGER = logging.getLogger('ibus-typing-booster')
 
@@ -75,11 +72,11 @@ class SoundObject:
                  audio_backend: str = 'automatic') -> None:
         self._path_to_sound_file: str = path_to_sound_file
         self._wav_file: Optional[wave.Wave_read] = None
-        self._paudio: Optional['_pyaudio.PyAudio'] = None
+        self._paudio: Optional[_pyaudio.PyAudio] = None
         self._play_pyaudio_thread: Optional[threading.Thread] = None
         self._stop_event_paudio: Optional[threading.Event] = None
-        self._simpleaudio_wave_o: Optional['_simpleaudio.WaveObject'] = None
-        self._simpleaudio_play_o: Optional['_simpleaudio.shiny.PlayObject'] = None
+        self._simpleaudio_wave_o: Optional[_simpleaudio.WaveObject] = None
+        self._simpleaudio_play_o: Optional[_simpleaudio.shiny.PlayObject] = None
         self._aplay_binary: Optional[str] = None
         self._aplay_stdin = b''
         self._aplay_process: Optional[Any] = None

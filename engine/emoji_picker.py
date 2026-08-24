@@ -21,35 +21,33 @@
 An emoji picker for ibus typing booster.
 '''
 
-from typing import Any
-from typing import List
-from typing import Tuple
-from typing import Iterable
-from typing import Dict
-from typing import Optional
-from typing import Union
-from types import FrameType
-import sys
-import os
-import re
-import threading
-import ast
-import signal
 import argparse
-import locale
-import time
+import ast
 import gettext
-import unicodedata
 import html
+import locale
 import logging
 import logging.handlers
+import os
+import re
+import signal
+import sys
+import threading
+import time
+import unicodedata
+from collections.abc import Iterable
+from types import FrameType
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from gi import require_version
+
 # pylint: disable=wrong-import-position
 require_version('GLib', '2.0')
-from gi.repository import GLib # type: ignore
+from gi.repository import GLib  # type: ignore
+
 require_version('Pango', '1.0')
-from gi.repository import Pango # type: ignore
+from gi.repository import Pango  # type: ignore
+
 # pylint: enable=wrong-import-position
 
 # set_prgname before importing other modules to show the name in warning
@@ -59,38 +57,38 @@ GLib.set_application_name('Emoji Picker')
 GLib.set_prgname('emoji-picker')
 
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports
-from itb_gtk import Gdk, Gtk, GTK_MAJOR
-from gi.repository import GObject # type: ignore
+from gi.repository import GObject  # type: ignore
+from itb_gtk import GTK_MAJOR, Gdk, Gtk
 # pylint: enable=wrong-import-position,wrong-import-order,ungrouped-imports
 import itb_emoji
+import itb_pango
 import itb_util_core
 import itb_util_gui
-import itb_pango
 import itb_version
 from g_compat_helpers import (
-    is_wayland,
-    add_child,
-    clear_children,
-    children_of,
-    forward_key_event_to_entry,
-    flowbox_get_children,
-    emoji_flowbox_get_labels,
-    show_all,
-    set_label_wrap_mode,
-    get_preferred_width,
-    get_preferred_height,
-    get_window_size,
-    get_toplevel_window,
-    PopupKind,
-    PopupManager,
-    create_popover,
-    clickable_event_box_compat_get_gtk_label,
     ClickableEventBoxCompat,
+    CompatButton,
     FakeEventKey,
     HeaderBarCompat,
-    CompatButton,
+    PopupKind,
+    PopupManager,
+    add_child,
+    children_of,
+    clear_children,
+    clickable_event_box_compat_get_gtk_label,
     connect_focus_signal,
+    create_popover,
+    emoji_flowbox_get_labels,
+    flowbox_get_children,
+    forward_key_event_to_entry,
+    get_preferred_height,
+    get_preferred_width,
+    get_toplevel_window,
+    get_window_size,
     grab_focus_without_selecting,
+    is_wayland,
+    set_label_wrap_mode,
+    show_all,
 )
 
 LOGGER = logging.getLogger('ibus-typing-booster')
@@ -402,7 +400,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
                 try:
                     self._gettext_translations[language] = gettext.translation(
                         DOMAINNAME, languages=[language])
-                except (OSError, ):
+                except OSError:
                     self._gettext_translations[language] = None
             else:
                 self._gettext_translations[language] = None
@@ -2506,8 +2504,8 @@ if __name__ == '__main__':
         LOGGER.addHandler(LOG_HANDLER_STREAM)
         LOGGER.info('********** STARTING **********')
         import cProfile
-        import pstats
         import io
+        import pstats
         PROFILE = cProfile.Profile()
         PROFILE.enable()
 
