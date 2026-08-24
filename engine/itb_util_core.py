@@ -3141,25 +3141,6 @@ def elide_middle(text: str, max_length: int = 80, ellipsis: str = '…') -> str:
     half = (max_length - len(ellipsis)) // 2
     return f'{text[:half]}{ellipsis}{text[-half:]}'
 
-def is_ascii(text: str) -> bool:
-    '''Checks whether all characters in text are ASCII characters
-
-    Returns “True” if the text is all ASCII, “False” if not.
-
-    :param text: The text to check
-
-    Examples:
-
-    >>> is_ascii('Abc')
-    True
-
-    >>> is_ascii('Naïve')
-    False
-    '''
-    if sys.version_info >= (3, 7): # str.ascii() was introduced in Python 3.7
-        return text.isascii()
-    return all(ord(char) < 128 for char in text)
-
 def is_invisible(text: str) -> bool:
     '''Checks whether a text is invisible
 
@@ -5926,7 +5907,7 @@ class KeyEvent:
         self.release = self.state & IBus.ModifierType.RELEASE_MASK != 0
         # MODIFIER_MASK: Modifier mask for the all the masks above
         self.modifier = self.state & IBus.ModifierType.MODIFIER_MASK != 0  # pylint: disable=no-member
-        if is_ascii(self.msymbol):
+        if self.msymbol.isascii():
             # The prefixes *must* be added in this order:
             # 'S-C-M-A-G-s-H-', see:
             # https://www.nongnu.org/m17n/manual-en/group__m17nInputMethodWin.html

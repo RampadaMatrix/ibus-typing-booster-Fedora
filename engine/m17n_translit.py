@@ -1008,10 +1008,8 @@ class Transliterator:
             raise ValueError('minput_create_ic() failed') from error
 
     def _convert_non_ascii_msymbol(self, msymbol: str) -> str:
-        # Python >= 3.7 has a str.isascii(), I could use that instead
-        # of my own is_ascii(), but that does not work on older
-        # distributions like openSUSE 15.6.
-        if itb_util_core.is_ascii(msymbol):
+        '''Convert a single char, non-ASCII symbol to the keyval name'''
+        if msymbol.isascii():
             return msymbol
         match = re.search(
             self._msymbol_single_char_with_prefix_pattern, msymbol)
