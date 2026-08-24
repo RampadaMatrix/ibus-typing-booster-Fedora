@@ -32,13 +32,8 @@ from typing import Optional
 from typing import Iterable
 from typing import Callable
 from typing import TYPE_CHECKING
+from typing import Literal
 import sys
-# pylint: disable=wrong-import-position
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-# pylint: enable=wrong-import-position
 import unicodedata
 import os
 import fnmatch
