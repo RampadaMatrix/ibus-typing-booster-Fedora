@@ -940,7 +940,7 @@ class TransliterationParts(NamedTuple):
                           For example in case of ja-anthy.mim,
                           this is 'aあ' before Henkan and changes
                           to '漢' in Henkan mode.
-    candidates: list[str] May contain a list of candidates if the
+    candidates: tuple[str, ...] May contain candidates if the
                           input method can produce multiple candidates.
     candidate_index: int  Index of the selected candidate.
                           0 if no candidate is selected.
@@ -957,7 +957,7 @@ class TransliterationParts(NamedTuple):
     preedit: str = ''
     cursor_pos: int = 0
     status: str = ''
-    candidates: list[str] = []
+    candidates: tuple[str, ...] = ()
     candidate_index: int = 0
     candidate_from: int = 0
     candidate_to: int = 0
@@ -1077,7 +1077,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('n '))
@@ -1092,7 +1092,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts =trans.transliterate_parts(list('na'))
@@ -1107,7 +1107,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('nam'))
@@ -1122,7 +1122,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('nama'))
@@ -1137,7 +1137,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('namas'))
@@ -1152,7 +1152,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('namast'))
@@ -1167,7 +1167,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('namaste'))
@@ -1182,7 +1182,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('namaste '))
@@ -1197,7 +1197,7 @@ class Transliterator:
         >>> parts.status
         'क'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
 
@@ -1214,7 +1214,7 @@ class Transliterator:
         >>> parts.status
         'Latin-post'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('u"'))
@@ -1229,7 +1229,7 @@ class Transliterator:
         >>> parts.status
         'Latin-post'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('u""'))
@@ -1244,7 +1244,7 @@ class Transliterator:
         >>> parts.status
         'Latin-post'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('u"u'))
@@ -1259,7 +1259,7 @@ class Transliterator:
         >>> parts.status
         'Latin-post'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('üu"u'))
@@ -1274,7 +1274,7 @@ class Transliterator:
         >>> parts.status
         'Latin-post'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
 
@@ -1291,7 +1291,7 @@ class Transliterator:
         >>> parts.status
         'RFC1345'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('&C'))
@@ -1306,7 +1306,7 @@ class Transliterator:
         >>> parts.status
         'RFC1345'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('&Co'))
@@ -1321,7 +1321,7 @@ class Transliterator:
         >>> parts.status
         'RFC1345'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('&f'))
@@ -1336,7 +1336,7 @@ class Transliterator:
         >>> parts.status
         'RFC1345'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('&ff'))
@@ -1351,7 +1351,7 @@ class Transliterator:
         >>> parts.status
         'RFC1345'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('&ffi'))
@@ -1366,7 +1366,7 @@ class Transliterator:
         >>> parts.status
         'RFC1345'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
 
@@ -1383,7 +1383,7 @@ class Transliterator:
         >>> parts.status
         'lsymbol'
         >>> parts.candidates
-        ['☺️', '😃', '😅', '😆', '😉', '😇', '😂', '😏', '😛', '😜', '😝', '😋', '😉', '💏', '💋', '😍', '😘', '😚', '😽', '😻']
+        ('☺️', '😃', '😅', '😆', '😉', '😇', '😂', '😏', '😛', '😜', '😝', '😋', '😉', '💏', '💋', '😍', '😘', '😚', '😽', '😻')
         >>> parts.candidate_show
         1
         >>> parts = trans.transliterate_parts(list('a'))
@@ -1398,7 +1398,7 @@ class Transliterator:
         >>> parts.status
         'lsymbol'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
         >>> parts = trans.transliterate_parts(list('a/'))
@@ -1413,7 +1413,7 @@ class Transliterator:
         >>> parts.status
         'lsymbol'
         >>> parts.candidates
-        ['/']
+        ('/',)
         >>> parts.candidate_show
         1
         >>> parts = trans.transliterate_parts(list('a/:'))
@@ -1428,7 +1428,7 @@ class Transliterator:
         >>> parts.status
         'lsymbol'
         >>> parts.candidates
-        ['/:']
+        ('/:',)
         >>> parts.candidate_show
         1
         >>> parts = trans.transliterate_parts(list('a/:('))
@@ -1443,7 +1443,7 @@ class Transliterator:
         >>> parts.status
         'lsymbol'
         >>> parts.candidates
-        ['😢', '😩', '😡', '😭', '😪', '🙈', '🙊', '🙉']
+        ('😢', '😩', '😡', '😭', '😪', '🙈', '🙊', '🙉')
         >>> parts.candidate_show
         1
         >>> parts = trans.transliterate_parts(list('a/:(b'))
@@ -1458,7 +1458,7 @@ class Transliterator:
         >>> parts.status
         'lsymbol'
         >>> parts.candidates
-        []
+        ()
         >>> parts.candidate_show
         0
 
@@ -1669,7 +1669,7 @@ class Transliterator:
                                        preedit=preedit,
                                        cursor_pos=cursor_pos,
                                        status=status,
-                                       candidates=candidates,
+                                       candidates=tuple(candidates),
                                        candidate_index=candidate_index,
                                        candidate_from=candidate_from,
                                        candidate_to=candidate_to,
@@ -1680,7 +1680,7 @@ class Transliterator:
             preedit=convert_digits_to_ascii(preedit),
             cursor_pos=cursor_pos,
             status=status,
-            candidates=candidates,
+            candidates=tuple(candidates),
             candidate_index=candidate_index,
             candidate_from=candidate_from,
             candidate_to=candidate_to,
