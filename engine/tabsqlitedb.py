@@ -1183,7 +1183,7 @@ CREATE TABLE phrases (id INTEGER PRIMARY KEY, input_phrase TEXT, phrase TEXT, p_
                     for x in phrases
                 ]
         except (sqlite3.Error, OSError, IndexError, AttributeError):
-            LOGGER.exception('Error extracting user phrases: %s: %s')
+            LOGGER.exception('Error extracting user phrases')
         except Exception: # pylint: disable=broad-except
             LOGGER.exception('Unexpected error extracting user phrases')
         return []

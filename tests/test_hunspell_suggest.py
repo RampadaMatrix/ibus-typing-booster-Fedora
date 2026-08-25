@@ -219,9 +219,9 @@ class HunspellSuggestTestCase(unittest.TestCase):
         'see: https://bugzilla.redhat.com/show_bug.cgi?id=2218460')
     def test_en_US(self) -> None:
         h = hunspell_suggest.Hunspell(['en_US'])
-        normal_suggestions = set((
-            'Camel', 'camel', 'camels', 'Camelot', 'camellia', 'Camelopardalis'))
-        spellcheck_suggestions = set(('came', 'cameo'))
+        normal_suggestions = {
+            'Camel', 'camel', 'camels', 'Camelot', 'camellia', 'Camelopardalis'}
+        spellcheck_suggestions = {'came', 'cameo'}
         for word, freq in h.suggest('camel'):
             if word in normal_suggestions and freq == 0:
                 normal_suggestions.remove(word)

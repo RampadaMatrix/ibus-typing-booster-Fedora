@@ -20,8 +20,6 @@
 '''
 A test program to test input purpose and hints
 '''
-
-from typing import Dict
 from typing import Any
 from typing import Optional
 from types import FrameType
@@ -101,7 +99,7 @@ class InputPurposeTest(Gtk.Window):  # type: ignore[misc]
 
         self._input_hints = itb_util_gui.InputHints.NONE
 
-        input_hints_checkbuttons: Dict[str, Gtk.CheckButton] = {}
+        input_hints_checkbuttons: dict[str, Gtk.CheckButton] = {}
         for hint in itb_util_gui.InputHints:
             if hint.name is None or hint.name == 'NONE':
                 continue

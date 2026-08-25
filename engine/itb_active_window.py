@@ -253,8 +253,7 @@ def get_active_window_xprop() -> tuple[str, str]:
         result = subprocess.run(
             [xprop_binary, '-root', '-f',
              '_NET_ACTIVE_WINDOW', '0x', ' $0', '_NET_ACTIVE_WINDOW'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=True, encoding='utf-8')
     except subprocess.CalledProcessError:
         LOGGER.exception('Exception when calling xprop')
@@ -272,8 +271,7 @@ def get_active_window_xprop() -> tuple[str, str]:
         result = subprocess.run(
             [xprop_binary,
              '-id', window_id, '-f', 'WM_CLASS', '0s', 'WM_CLASS'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=True, encoding='utf-8')
     except subprocess.CalledProcessError:
         LOGGER.exception('Exception when calling xprop')
@@ -291,8 +289,7 @@ def get_active_window_xprop() -> tuple[str, str]:
         result = subprocess.run(
             [xprop_binary,
              '-id', window_id, '-f', '_NET_WM_NAME', '0t', '_NET_WM_NAME'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=True, encoding='utf-8')
     except subprocess.CalledProcessError:
         LOGGER.exception('Exception when calling xprop')

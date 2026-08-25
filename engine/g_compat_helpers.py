@@ -35,6 +35,7 @@ from enum import Enum, auto
 from typing import (
     Any,
     Callable,
+    ClassVar,
     Optional,
     cast,
     overload,
@@ -120,7 +121,7 @@ def set_label_wrap_mode(label: Gtk.Label, wrap: bool = True,
     else:
         try:
             label.set_property('wrap', wrap)
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             pass
     if hasattr(label, 'set_wrap_mode'): # Gtk4
         label.set_wrap_mode(wrap_mode)
@@ -129,7 +130,7 @@ def set_label_wrap_mode(label: Gtk.Label, wrap: bool = True,
     else:
         try:
             label.set_property('wrap-mode', wrap_mode)
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             pass
 
 def clear_children(widget: Gtk.Widget) -> None:
@@ -163,7 +164,7 @@ def children_of(widget: Gtk.Widget) -> list[Gtk.Widget]:
     if hasattr(widget, 'get_children'): # Gtk3 containers
         try:
             return list(widget.get_children())
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             pass
     # Gtk4 single-child widgets / scrolled windows
     if hasattr(widget, 'get_child'):
@@ -174,7 +175,7 @@ def children_of(widget: Gtk.Widget) -> list[Gtk.Widget]:
                 inner = child.get_child()
                 return [inner] if inner is not None else []
             return [child] if child is not None else []
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             pass
     # Gtk4 multi-child sibling API
     if hasattr(widget, 'get_first_child') and hasattr(widget, 'get_next_sibling'):
@@ -198,14 +199,14 @@ def show_all(widget: Optional[Gtk.Widget]) -> None:
         try:
             widget.show_all()
             return
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             # fall through to manual recursion
             pass
     # Set this widget visible if possible
     if hasattr(widget, 'set_visible'):
         try:
             widget.set_visible(True)
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             pass
     # Recurse into children
     for child in children_of(widget):
@@ -223,7 +224,7 @@ def icon_image_for_name(icon_name: str, icon_size: int = 48) -> Gtk.Image:
             pix = theme.load_icon(icon_name, icon_size, 0)
             if pix is not None:
                 return Gtk.Image.new_from_pixbuf(pix)
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
         pass
     try: # Try Gtk4 style first (no size argument)
         img = Gtk.Image.new_from_icon_name(icon_name)
@@ -231,15 +232,15 @@ def icon_image_for_name(icon_name: str, icon_size: int = 48) -> Gtk.Image:
         if hasattr(img, 'set_pixel_size'):
             try:
                 img.set_pixel_size(icon_size)
-            except Exception: # pylint: disable=broad-except
+            except Exception: # pylint: disable=broad-except  # noqa: BLE001
                 pass
         return img
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
         pass
     try: # Gtk3 style with explicit IconSize constant
         img = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
         return img
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable=broad-except  # noqa: BLE001
         pass
     return Gtk.Image() # Last resort: return an empty Image (no icon)
 
@@ -931,7 +932,7 @@ class MessageDialogCompat: # pylint: disable=too-few-public-methods
         ).show()
     '''
 
-    ICONS = {
+    ICONS: ClassVar[dict[Gtk.MessageType, str]] = {
         Gtk.MessageType.INFO: 'dialog-information',
         Gtk.MessageType.WARNING: 'dialog-warning',
         Gtk.MessageType.ERROR: 'dialog-error',
@@ -1203,7 +1204,7 @@ def choose_file_open(
         if initial_folder:
             try:
                 dialog.set_current_folder(initial_folder)
-            except Exception: # pylint: disable=broad-exception-caught
+            except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                 pass  # Ignore invalid paths
         response = dialog.run()
         filename = None

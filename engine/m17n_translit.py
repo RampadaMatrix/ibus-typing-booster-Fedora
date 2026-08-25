@@ -1466,7 +1466,7 @@ class Transliterator:
         '''
         # pylint: enable=line-too-long
         if not isinstance(msymbol_list, list):
-            raise ValueError('Argument of transliterate() must be a list.')
+            raise TypeError('Argument of transliterate() must be a list.')
         if self._dummy:
             return TransliterationParts(committed=''.join(msymbol_list),
                                        committed_index=len(msymbol_list))

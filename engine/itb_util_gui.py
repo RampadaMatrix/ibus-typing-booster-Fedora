@@ -25,6 +25,7 @@ that should go into the itb_util_core module.
 '''
 from typing import Any
 from typing import Optional
+from typing import cast
 # pylint: disable=wrong-import-position
 import sys
 from enum import Enum, IntFlag
@@ -147,8 +148,8 @@ def get_primary_selection_text() -> str:
                 if result.stdout.strip():
                     LOGGER.info('Got primary selection with xclip.')
                     return result.stdout.strip()
-            except Exception as xclip_error: # pylint: disable=broad-except
-                LOGGER.exception('xclip failed: %s', xclip_error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('xclip failed')
                 return ''
         xsel_binary = shutil.which('xsel')
         if xsel_binary:
@@ -161,8 +162,8 @@ def get_primary_selection_text() -> str:
                 if result.stdout.strip():
                     LOGGER.info('Got primary selection with xsel.')
                     return result.stdout.strip()
-            except Exception as xsel_error: # pylint: disable=broad-except
-                LOGGER.exception('xsel failed: %s', xsel_error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('xsel failed')
                 return ''
     if os.environ.get('XDG_SESSION_TYPE', '').lower() == 'wayland':
         wl_paste_binary = shutil.which('wl-paste')
@@ -176,8 +177,8 @@ def get_primary_selection_text() -> str:
                 if result.stdout.strip():
                     LOGGER.info('Got primary selection with wl-paste.')
                     return result.stdout.strip()
-            except Exception as wl_paste_error: # pylint: disable=broad-except
-                LOGGER.exception('wl-paste failed: %s', wl_paste_error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('wl-paste failed')
                 return ''
     # Run python helper script using Gtk4 to get the selection.
     try:
@@ -191,8 +192,8 @@ def get_primary_selection_text() -> str:
         if result.stdout.strip():
             LOGGER.info('Got primary selection with Gtk4.')
             return result.stdout.strip()
-    except Exception as error: # pylint: disable=broad-except
-        LOGGER.exception('Primary selection helper failed: %s', error)
+    except Exception: # pylint: disable=broad-except
+        LOGGER.exception('Primary selection helper failed')
     return ''
 
 class InputPurpose(Enum):
@@ -246,11 +247,11 @@ class InputPurpose(Enum):
     def __int__(self) -> int:
         return int(self._value_)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if (self.__class__ is other.__class__
             or other.__class__ is Gtk.InputPurpose
             or other.__class__ is IBus.InputPurpose):
-            return int(self) == int(other)
+            return int(self) == int(cast(int, other))
         if other.__class__ is int or other.__class__ is float:
             return bool(int(self) == other)
         return NotImplemented
@@ -366,11 +367,11 @@ class InputHints(IntFlag):
     def __int__(self) -> int:
         return int(self._value_)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if (self.__class__ is other.__class__
             or other.__class__ is Gtk.InputHints
             or other.__class__ is IBus.InputHints):
-            return bool(int(self) == int(other))
+            return bool(int(self) == int(cast(int, other)))
         if other.__class__ is int or other.__class__ is float:
             return bool(int(self) == other)
         return NotImplemented
@@ -512,7 +513,7 @@ class KeyvalsToKeycodes:
                 for k in keys_list:
                     if hasattr(k, 'keyval'):
                         try:
-                            kv = int(getattr(k, 'keyval'))
+                            kv = int(k.keyval)
                         except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                             continue
                         if kv:

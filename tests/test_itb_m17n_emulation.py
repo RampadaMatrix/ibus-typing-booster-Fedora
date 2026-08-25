@@ -24,8 +24,6 @@ This file implements the test cases for the unit tests of ibus-typing-booster em
 
 from typing import Any
 from typing import Optional
-from typing import Dict
-from typing import List
 import os
 import glob
 import sys
@@ -137,10 +135,10 @@ class ItbM17nEmuTestCase(unittest.TestCase):
     orig_show_number_of_candidates = False
     orig_show_status_info_in_auxiliary_text = False
     orig_add_space_on_commit = True
-    orig_current_imes: List[str] = []
-    orig_dictionary_names: List[str] = []
+    orig_current_imes: list[str] = []  # noqa: RUF012
+    orig_dictionary_names: list[str] = []  # noqa: RUF012
     orig_avoid_forward_key_event = False
-    orig_keybindings: Dict[str, List[str]] = {}
+    orig_keybindings: dict[str, list[str]] = {}  # noqa: RUF012
     orig_use_ibus_keymap = False
     orig_ibus_keymap = 'in'
 
@@ -421,7 +419,7 @@ class ItbM17nEmuTestCase(unittest.TestCase):
         except ValueError as error:
             trans = None
             self.skipTest(error)
-        except Exception as error: # pylint: disable=broad-except
+        except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
             sys.stderr.write('Unexpected exception!')
             trans = None
             self.skipTest(error)

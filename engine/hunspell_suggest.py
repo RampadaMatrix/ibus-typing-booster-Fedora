@@ -29,6 +29,7 @@ import sys
 import unicodedata
 from collections.abc import Iterable
 from types import ModuleType
+from typing import ClassVar
 from typing import Optional
 
 import itb_util_core
@@ -69,9 +70,9 @@ MAX_WORDS = 100
 # pylint: disable=attribute-defined-outside-init
 class Dictionary:
     '''A class to hold a hunspell dictionary'''
-    _instances: dict[tuple[type['Dictionary'], str], 'Dictionary'] = {}
+    _instances: ClassVar[dict[tuple[type['Dictionary'], str], 'Dictionary']] = {}
 
-    def __new__(cls: type['Dictionary'], name: str = 'en_US') -> 'Dictionary':
+    def __new__(cls: type['Dictionary'], name: str = 'en_US') -> 'Dictionary':  # noqa: PYI034
         '''Caching instances of this class and reuse previously created instances'''
         key = (cls, name)
         if key not in cls._instances:
@@ -322,7 +323,7 @@ class Dictionary:
     # still entries in the cache for that instance. But if all entries
     # referring to a self are evicted, then self can be garbage
     # collected properly.
-    @functools.lru_cache(maxsize=500_000)
+    @functools.lru_cache(maxsize=500_000)  # noqa: B019
     def spellcheck_suggest(self, word: str) -> list[str]:
         '''Return spellchecking suggestions for word using enchant,
         pyhunspell or voikko
@@ -483,9 +484,7 @@ class Hunspell:
             if dictionary.has_spellchecking():
                 spellchecking_dictionaries_available = True
                 spellcheck_total |= dictionary.spellcheck(input_phrase)
-        if not spellcheck_total and spellchecking_dictionaries_available:
-            return False
-        return True
+        return spellcheck_total or not spellchecking_dictionaries_available
 
     def spellcheck_match_list(self, input_phrase: str) -> list[str]:
         '''
@@ -595,7 +594,7 @@ class Hunspell:
     # still entries in the cache for that instance. But if all entries
     # referring to a self are evicted, then self can be garbage
     # collected properly.
-    @functools.lru_cache(maxsize=500_000)
+    @functools.lru_cache(maxsize=500_000)  # noqa: B019
     def suggest(self, input_phrase: str) -> list[tuple[str, int]]:
         # pylint: disable=line-too-long
         '''Return completions or corrections for the input phrase

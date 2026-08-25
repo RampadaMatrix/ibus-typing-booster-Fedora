@@ -998,7 +998,7 @@ class TypingBoosterEngine(IBus.Engine):
             'capitalize': {
                 'next': 'upper',
                 'previous': 'lower',
-                'function': lambda x: getattr(
+                'function': lambda x: getattr(  # noqa: B009
                     str, 'capitalize')(x[:1]) + x[1:]},
             'title': {
                 'next': 'upper',
@@ -1011,16 +1011,16 @@ class TypingBoosterEngine(IBus.Engine):
                 #
                 # Therefore, make sure the case change is done after the string
                 # is converted to NFC.
-                'function': lambda x: getattr(
+                'function': lambda x: getattr(  # noqa: B009
                     str, 'title')(itb_util_core.normalize_nfc_and_composition_exclusions(x))},
             'upper': {
                 'next': 'lower',
                 'previous': 'capitalize',
-                'function': getattr(str, 'upper')},
+                'function': getattr(str, 'upper')},  # noqa: B009
             'lower': {
                 'next': 'capitalize',
                 'previous': 'upper',
-                'function': getattr(str, 'lower')},
+                'function': getattr(str, 'lower')},  # noqa: B009
         }
 
         self._lookup_table: TypingBoosterLookupTable = TypingBoosterLookupTable(

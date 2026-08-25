@@ -161,7 +161,8 @@ class SoundObject:
                 self._path_to_sound_file, mime_type)
             return ''
         try:
-            self._wav_file = wave.open(self._path_to_sound_file, 'rb')
+            # The wave file must remain open for the lifetime of the SoundObject.
+            self._wav_file = wave.open(self._path_to_sound_file, 'rb')  # noqa: SIM115
             self._paudio = pyaudio.PyAudio()
             self._stop_event_paudio = threading.Event()
             LOGGER.info('portaudio version = %s',

@@ -19,11 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from typing import List
-from typing import Dict
 from typing import Optional
 import os
-import os.path as path
+from os import path
 import sys
 import re
 import sqlite3
@@ -36,23 +34,23 @@ class LangDictTable:
         Class that specifies accent rules that needs to be appied for each language
         If user has specified user dictionary then that can be overiden by default mapping
     '''
-    def __init__(self, dict_name: str, lang_dict: Optional[Dict[str, str]] = None) -> None:
+    def __init__(self, dict_name: str, lang_dict: Optional[dict[str, str]] = None) -> None:
         self.lang: str = dict_name
-        self.lang_table: Optional[Dict[str, str]] = lang_dict
+        self.lang_table: Optional[dict[str, str]] = lang_dict
 
-    def get_lang_table(self) -> Dict[str, str]:
+    def get_lang_table(self) -> dict[str, str]:
         if self.lang_table:
             return self.lang_table
         else:
             return self.get_sys_lang_table()
 
-    def get_sys_lang_table(self) -> Dict[str, str]:
+    def get_sys_lang_table(self) -> dict[str, str]:
         if self.lang == 'mr_IN.dic':
             return self.get_mr_table()
         return {}
 
-    def get_mr_table(self) -> Dict[str, str]:
-        table: Dict[str, str] = dict({
+    def get_mr_table(self) -> dict[str, str]:
+        table: dict[str, str] = dict({
             ('ā', 'aa'),
             ('ṭ', 't'),
             ('ḍ', 'd'),
@@ -100,7 +98,7 @@ class LatinConvert:
         try:
             with open(self.aff_file, mode='r', encoding='ISO-8859-1') as f:
                 aff_buffer = f.read().replace('\r\n', '\n')
-        except Exception:
+        except Exception:  # noqa: BLE001
             import traceback
             traceback.print_exc()
         if aff_buffer:
@@ -110,31 +108,28 @@ class LatinConvert:
             match = encoding_pattern.search(aff_buffer)
             if match:
                 encoding = match.group('encoding')
-                print("load_dictionary(): encoding=%(enc)s found in %(aff)s" %{
-                    'enc': encoding, 'aff': self.aff_file})
+                print(f'load_dictionary(): encoding={encoding} found in {self.aff_file}')
         if not encoding:
             encoding = 'UTF-8'
         try:
             with open(self.hunspell_dict, encoding=encoding) as f:
                 dict_buffer = f.read().replace('\r\n', '\n')
-        except Exception:
-            print("load_dictionary(): loading %(dic)s as %(enc)s encoding failed, fall back to ISO-8859-1." %{
-                'dic': self.hunspell_dict, 'enc': encoding})
+        except Exception:  # noqa: BLE001
+            print(f'load_dictionary(): loading {self.hunspell_dict} as {encoding} encoding failed, fall back to ISO-8859-1.')
             encoding = 'ISO-8859-1'
             try:
                 with  open(self.hunspell_dict, encoding=encoding) as f:
                     dict_buffer = f.read().replace('\r\n', '\n')
-            except Exception:
-                print("load_dictionary(): loading %(dic)s as %(enc)s encoding failed, giving up." %{
-                    'dic': self.hunspell_dict, 'enc': encoding})
+            except Exception:  # noqa: BLE001
+                print(f'load_dictionary(): loading {self.hunspell_dict} as {encoding} encoding failed, giving up.')
         if dict_buffer[0] == '\ufeff':
             dict_buffer = dict_buffer[1:]
         return dict_buffer
 
-    def get_words(self) -> List[str]:
+    def get_words(self) -> list[str]:
         buff = self.read_hunspell_dict()
         word_pattern = re.compile(r'^[^\s]+.*?(?=/|$)', re.MULTILINE|re.UNICODE)
-        words: List[str] = word_pattern.findall(buff)
+        words: list[str] = word_pattern.findall(buff)
         _nwords = int(words[0])
         words = words[1:]
         return words
@@ -142,7 +137,7 @@ class LatinConvert:
     def trans_word(self, word: str) -> str:
         try:
             return str(self.trans.transliterate(word)[0])
-        except Exception:
+        except Exception:   # noqa: BLE001
             print("Error while transliteration")
             return word
 
@@ -158,7 +153,7 @@ class LatinConvert:
                 new_word.append(char)
         return ''.join(new_word)
 
-    def get_converted_words(self) -> List[str]:
+    def get_converted_words(self) -> list[str]:
         words = self.get_words()
         icu_words = list(map(self.trans_word, words))
         ascii_words = list(map(self.remove_accent, icu_words))
@@ -169,17 +164,17 @@ class LatinConvert:
         sql_table_name = "phrases"
         try:
             conn = sqlite3.connect(self.user_db)
-            sql = "INSERT INTO %s (input_phrase, phrase, user_freq, timestamp) values(:input_phrase, :phrase, :user_freq, :timestamp);" % (sql_table_name)
-            sqlargs = []
-            list(map(lambda x: sqlargs.append(
+            sql = f'INSERT INTO {sql_table_name} (input_phrase, phrase, user_freq, timestamp) values(:input_phrase, :phrase, :user_freq, :timestamp);'
+            sqlargs = [
                 {'input_phrase': x,
                  'phrase': x,
                  'user_freq': 0,
-                 'timestamp': time.time()}),
-                words))
+                 'timestamp': time.time()}
+                for x in words
+            ]
             conn.executemany(sql,sqlargs)
             conn.commit()
-        except Exception:
+        except Exception:  # noqa: BLE001
             import traceback
             traceback.print_exc()
 
@@ -213,8 +208,7 @@ def main() -> None:
             # name, add the default path:
             user_dict = path.join (tables_path, user_dict)
         if not path.exists(user_dict):
-            sys.stderr.write(
-                "The user database %(udb)s does not exist .\n" %{'udb': user_dict})
+            sys.stderr.write(f'The user database {user_dict} does not exist.\n')
             sys.exit(1)
     if hunspell_dict:
         # Not sure how to get hunspell dict path from env
@@ -225,8 +219,7 @@ def main() -> None:
             # name, add the default path:
             hunspell_dict = path.join(hunspell_path,hunspell_dict)
         if not path.exists(hunspell_dict):
-            sys.stderr.write(
-                "The hunspell dictionary  %(hud)s does not exists .\n" %{'hud': hunspell_dict})
+            sys.stderr.write(f'The hunspell dictionary {hunspell_dict} does not exist.\n')
             sys.exit(1)
     lt = LatinConvert(user_dict,
                       hunspell_dict,

@@ -31,7 +31,6 @@ from signal import SIGINT, SIGTERM, signal
 from typing import Any, Optional, Union
 
 # pylint: disable=wrong-import-position
-# ruff: noqa: I001  # require_version() must precede gi.repository imports
 from gi import require_version
 require_version('IBus', '1.0')
 from gi.repository import IBus  # ty: ignore[unresolved-import]

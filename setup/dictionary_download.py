@@ -21,9 +21,6 @@ dictionary_download.py
 
 Uses Gio.File to download dictionary files with a Gtk3 progress dialog.
 '''
-from typing import Dict
-from typing import Set
-from typing import List
 from typing import Optional
 from typing import Callable
 from typing import Literal
@@ -41,7 +38,7 @@ from gi.repository import Gio # type: ignore
 try:
     require_version('Soup', '3.0')
     from gi.repository import Soup # type: ignore
-except Exception: # pylint: disable=broad-exception-caught
+except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
     # no Soup 3 available, try Soup 2.4
     require_version('Soup', '2.4')
     from gi.repository import Soup # type: ignore
@@ -457,7 +454,7 @@ def download_file_async(
     try:
         os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     except Exception as error: # pylint: disable=broad-except
-        LOGGER.exception('Failed to make directory: %s', error)
+        LOGGER.exception('Failed to make directory')
         if on_output:
             on_output(f'Failed to make directory: {error}')
         if on_complete and not (cancellable and cancellable.is_cancelled()):
@@ -470,7 +467,7 @@ def download_file_async(
             Gio.FileCreateFlags.NONE, # pylint: disable=no-member
             cancellable)
     except GLib.Error as err:
-        LOGGER.exception('Failed to open destination: %s', err)
+        LOGGER.exception('Failed to open destination')
         if on_output:
             on_output(f'Failed to open destination: {err}')
         if on_complete:
@@ -478,8 +475,8 @@ def download_file_async(
         return
 
     if Soup.MAJOR_VERSION == 3:
-        session: 'Soup.Session' = Soup.Session()
-        message: 'Soup.Message' = Soup.Message.new('GET', url)
+        session: Soup.Session = Soup.Session()
+        message: Soup.Message = Soup.Message.new('GET', url)
 
         def on_read_finished(
                 session: 'Soup.Session',
@@ -494,11 +491,11 @@ def download_file_async(
                 try:
                     # GLib.Bytes.get_data()
                     data_bytes = body.get_data()
-                except Exception: # pylint: disable=broad-exception-caught
+                except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                     try:
                         # Maybe it’s already a Python bytes object
                         data_bytes = bytes(body)
-                    except Exception: # pylint: disable=broad-exception-caught
+                    except Exception: # pylint: disable=broad-exception-caught  # noqa: BLE001
                         if on_output:
                             on_output('Failed: could not obtain response bytes')
                         if on_complete:
@@ -508,7 +505,7 @@ def download_file_async(
                 try:
                     out_stream.write_bytes(gbytes, cancellable)
                 except GLib.Error as err:
-                    LOGGER.exception('Write failed: %s', err)
+                    LOGGER.exception('Write failed')
                     if on_output:
                         on_output(f'Write failed: {err}')
                     if on_complete:
@@ -517,7 +514,7 @@ def download_file_async(
                 try:
                     out_stream.close(cancellable)
                 except GLib.Error as err:
-                    LOGGER.exception('Failed to close output: %s', err)
+                    LOGGER.exception('Failed to close output')
                     if on_output:
                         on_output(f'Failed to close output: {err}')
                     if on_complete:
@@ -545,7 +542,7 @@ def download_file_async(
                     if on_complete:
                         on_complete('cancelled')
                 else:
-                    LOGGER.exception('Failed to send request: %s', err)
+                    LOGGER.exception('Failed to send request')
                     if on_output:
                         on_output(f'Failed to send request: {err}')
                     if on_complete:
@@ -560,9 +557,9 @@ def download_file_async(
         return
 
     # Soup3 could not be imported, try Soup2:
-    session_soup2: 'Soup.SessionAsync' = (
+    session_soup2: Soup.SessionAsync = (
         Soup.SessionAsync()) # pylint: disable=c-extension-no-member
-    message_soup2: 'Soup.Message' = Soup.Message.new('GET', url)
+    message_soup2: Soup.Message = Soup.Message.new('GET', url)
 
     total_bytes: int = -1
     received_bytes: int = 0
@@ -578,7 +575,7 @@ def download_file_async(
         try:
             out_stream.write(data_bytes, cancellable)
         except GLib.Error as err:
-            LOGGER.exception('Write failed: %s', err)
+            LOGGER.exception('Write failed')
             if on_output:
                 on_output(f'Write failed: {err}')
             if on_complete:
@@ -612,14 +609,14 @@ def download_file_async(
     session_soup2.queue_message(message_soup2, None)
 
 def download_dictionaries_sequentially_async(
-    languages: Set[str],
+    languages: set[str],
     on_output: Optional[Callable[[str], None]],
     on_progress: Optional[Callable[[float], None]],
     on_complete: Optional[Callable[[InstallStatus], None]],
     cancellable: Optional[Gio.Cancellable] = None,
 ) -> None:
     '''Download dictionaries sequentially, one by one.'''
-    url_list: List[Dict[str, str]] = []
+    url_list: list[dict[str, str]] = []
     for language in sorted(languages):
         url_base = DICTIONARY_SOURCES.get(language, '')
         if not url_base:
@@ -631,7 +628,7 @@ def download_dictionaries_sequentially_async(
                 itb_util_core.xdg_save_data_path('ibus-typing-booster/data/')
                 + language + suffix})
 
-    results: Dict[str, bool] = {}
+    results: dict[str, bool] = {}
 
     def download_next(index: int = 0) -> None:
         '''Download the next url'''
@@ -733,7 +730,7 @@ def ensure_enchant_symlinks(data_dir: str) -> None:
 
 def download_dictionaries_with_dialog(
     parent: Optional[Gtk.Window],
-    languages: Set[str],
+    languages: set[str],
     on_complete: Optional[CompleteCallback] = None,
 ) -> None:
     '''Show a transient GTK dialog to download dictionaries asynchronously.'''

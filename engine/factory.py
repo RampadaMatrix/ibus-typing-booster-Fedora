@@ -24,7 +24,7 @@ import gettext
 import logging
 import os
 import re
-from typing import Dict, Optional
+from typing import Optional
 
 from gi import require_version
 
@@ -65,8 +65,8 @@ class EngineFactory(IBus.Factory):
         if DEBUG_LEVEL > 1:
             LOGGER.debug('EngineFactory.__init__(bus=%s)\n', bus)
         self.database: Optional[tabsqlitedb.TabSqliteDb] = None
-        self.database_dict: Dict[str, tabsqlitedb.TabSqliteDb] = {}
-        self.enginedict: Dict[str, hunspell_table.TypingBoosterEngine] = {}
+        self.database_dict: dict[str, tabsqlitedb.TabSqliteDb] = {}
+        self.enginedict: dict[str, hunspell_table.TypingBoosterEngine] = {}
         self.bus = bus
         #engine.Engine.CONFIG_RELOADED(bus)
         super().__init__(
@@ -109,11 +109,9 @@ class EngineFactory(IBus.Factory):
                 self.enginedict[engine_name] = engine
                 self.engine_id += 1
             return engine
-        except Exception as error: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Failed to create engine %s: %s: %s',
-                engine_name, error.__class__.__name__, error)
-            raise Exception from error # pylint: disable=broad-exception-raised
+        except Exception: # pylint: disable=broad-except
+            LOGGER.exception('Failed to create engine %s', engine_name)
+            raise
 
     def do_destroy(self) -> None:  # pylint: disable=arguments-differ
         '''Destructor, which finish some task for IME'''

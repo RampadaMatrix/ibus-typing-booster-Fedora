@@ -106,7 +106,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         except ValueError as error:
             trans = None
             self.skipTest(error)
-        except Exception as error: # pylint: disable=broad-except
+        except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
             sys.stderr.write('Unexpected exception!')
             trans = None
             self.skipTest(error)
@@ -123,7 +123,7 @@ class M17nTranslitTestCase(unittest.TestCase):
             _dummy_trans = m17n_translit.Transliterator('ru-translitx')
         except ValueError:
             pass
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable=broad-except  # noqa: BLE001
             # Something unexpected happened:
             self.assertTrue(False) # pylint: disable=redundant-unittest-assert
 
@@ -556,7 +556,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'न्')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(['n', 'S-C-Return'])
         self.assertEqual(transliterated_parts.committed, 'न्')
@@ -564,7 +564,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(['n', 'S-C-Return', ' '])
         self.assertEqual(transliterated_parts.committed, 'न् ')
@@ -572,7 +572,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('n '))
         self.assertEqual(transliterated_parts.committed, 'न ')
@@ -580,7 +580,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('na'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -588,7 +588,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'न')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('nam'))
         self.assertEqual(transliterated_parts.committed, 'न')
@@ -596,7 +596,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'म्')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('nama'))
         self.assertEqual(transliterated_parts.committed, 'न')
@@ -604,7 +604,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'म')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('namas'))
         self.assertEqual(transliterated_parts.committed, 'नम')
@@ -612,7 +612,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'स्')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('namast'))
         self.assertEqual(transliterated_parts.committed, 'नम')
@@ -620,7 +620,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'स्त्')
         self.assertEqual(transliterated_parts.cursor_pos, 4)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('namaste'))
         self.assertEqual(transliterated_parts.committed, 'नम')
@@ -628,7 +628,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'स्ते')
         self.assertEqual(transliterated_parts.cursor_pos, 4)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('namaste '))
         self.assertEqual(transliterated_parts.committed, 'नमस्ते ')
@@ -636,7 +636,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'क')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
 
     def test_t_latn_post_parts(self) -> None:
@@ -647,7 +647,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'u')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'Latin-post')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts =     trans.transliterate_parts(list('u"'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -655,7 +655,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'ü')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'Latin-post')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts =     trans.transliterate_parts(list('u""'))
         self.assertEqual(transliterated_parts.committed, 'u"')
@@ -663,7 +663,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'Latin-post')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts =     trans.transliterate_parts(list('u"u'))
         self.assertEqual(transliterated_parts.committed, 'ü')
@@ -671,7 +671,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'u')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'Latin-post')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts =     trans.transliterate_parts(list('üu"u'))
         self.assertEqual(transliterated_parts.committed, 'üü')
@@ -679,7 +679,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'u')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'Latin-post')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
 
     def test_t_rfc1345_parts(self) -> None:
@@ -690,7 +690,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '&')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('&C'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -698,7 +698,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '&C')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('&Co'))
         self.assertEqual(transliterated_parts.committed, '©')
@@ -706,7 +706,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('&f'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -714,7 +714,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '&f')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('&ff'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -722,7 +722,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'ﬀ')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('&ffi'))
         self.assertEqual(transliterated_parts.committed, 'ﬃ')
@@ -730,7 +730,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('☺&ffi中'))
         self.assertEqual(transliterated_parts.committed, '☺ﬃ中')
@@ -738,7 +738,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'RFC1345')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
 
     @unittest.skipUnless(
@@ -755,7 +755,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.status, 'lsymbol')
         self.assertEqual(
             transliterated_parts.candidates,
-            ['☺️', '😃', '😅', '😆', '😉', '😇', '😂', '😏', '😛', '😜', '😝', '😋', '😉', '💏', '💋', '😍', '😘', '😚', '😽', '😻'])
+            ('☺️', '😃', '😅', '😆', '😉', '😇', '😂', '😏', '😛', '😜', '😝', '😋', '😉', '💏', '💋', '😍', '😘', '😚', '😽', '😻'))
         self.assertEqual(transliterated_parts.candidate_show, 1)
         transliterated_parts = trans.transliterate_parts(list('a'))
         self.assertEqual(transliterated_parts.committed, 'a')
@@ -763,7 +763,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'lsymbol')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('a/'))
         self.assertEqual(transliterated_parts.committed, 'a')
@@ -771,7 +771,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '/')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'lsymbol')
-        self.assertEqual(transliterated_parts.candidates, ['/'])
+        self.assertEqual(transliterated_parts.candidates, ('/',))
         self.assertEqual(transliterated_parts.candidate_show, 1)
         transliterated_parts = trans.transliterate_parts(list('a/:'))
         self.assertEqual(transliterated_parts.committed, 'a')
@@ -779,7 +779,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '/:')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'lsymbol')
-        self.assertEqual(transliterated_parts.candidates, ['/:'])
+        self.assertEqual(transliterated_parts.candidates, ('/:',))
         self.assertEqual(transliterated_parts.candidate_show, 1)
         transliterated_parts = trans.transliterate_parts(list('a/:('))
         self.assertEqual(transliterated_parts.committed, 'a')
@@ -789,7 +789,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.status, 'lsymbol')
         self.assertEqual(
             transliterated_parts.candidates,
-            ['😢', '😩', '😡', '😭', '😪', '🙈', '🙊', '🙉'])
+            ('😢', '😩', '😡', '😭', '😪', '🙈', '🙊', '🙉'))
         self.assertEqual(transliterated_parts.candidate_show, 1)
         transliterated_parts = trans.transliterate_parts(list('a/:(b'))
         self.assertEqual(transliterated_parts.committed, 'a😢b')
@@ -797,7 +797,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'lsymbol')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         # pylint: enable=line-too-long
 
@@ -814,7 +814,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'aあ')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('亜'))
         self.assertEqual(transliterated_parts.committed, '亜')
@@ -822,7 +822,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'aあ')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('😇'))
         self.assertEqual(transliterated_parts.committed, '😇')
@@ -830,7 +830,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'aあ')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('a'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -838,7 +838,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'あ')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'aあ')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('a '))
         self.assertEqual(transliterated_parts.committed, '')
@@ -874,7 +874,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, 'きしゃ')
         self.assertEqual(transliterated_parts.cursor_pos, 3)
         self.assertEqual(transliterated_parts.status, 'aあ')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('kisha '))
         self.assertEqual(transliterated_parts.committed, '')
@@ -947,7 +947,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '\\')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\i'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -955,7 +955,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '\\i')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\in'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -963,7 +963,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '\\∈')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\int'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -971,7 +971,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '\\∫')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\inter'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -979,7 +979,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '\\inter')
         self.assertEqual(transliterated_parts.cursor_pos, 6)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\inters'))
         self.assertEqual(transliterated_parts.committed, '')
@@ -987,7 +987,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '∩')
         self.assertEqual(transliterated_parts.cursor_pos, 1)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\inters '))
         self.assertEqual(transliterated_parts.committed, '∩ ')
@@ -995,7 +995,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('\\inters☺'))
         self.assertEqual(transliterated_parts.committed, '∩☺')
@@ -1003,7 +1003,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '')
         self.assertEqual(transliterated_parts.cursor_pos, 0)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
         transliterated_parts = trans.transliterate_parts(list('☺\\int'))
         self.assertEqual(transliterated_parts.committed, '☺')
@@ -1011,7 +1011,7 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(transliterated_parts.preedit, '\\∫')
         self.assertEqual(transliterated_parts.cursor_pos, 2)
         self.assertEqual(transliterated_parts.status, 'Math: latex')
-        self.assertEqual(transliterated_parts.candidates, [])
+        self.assertEqual(transliterated_parts.candidates, ())
         self.assertEqual(transliterated_parts.candidate_show, 0)
 
     def test_unicode(self) -> None:
@@ -1496,9 +1496,9 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('use-automatic-vowel-forming',
-              'If this variable is 1 (the default), automatic vowel forming is used.\n'
-              'For example, a dependent vowel like া is automatically converted to\n'
-              'the independent form আ if it is not typed after a consonant.',
+              ('If this variable is 1 (the default), automatic vowel forming is used.\n'
+               'For example, a dependent vowel like া is automatically converted to\n'
+               'the independent form আ if it is not typed after a consonant.'),
               '1')])
 
     def test_get_variables_ath_phonetic(self) -> None:
@@ -1512,11 +1512,11 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('precomposed',
-              'Flag to tell whether or not to generate precomposed characters.\n'
-              'If 1 (the default), generate precomposed characters (i.e. NFC) if available '
-              '(e.g. "ྲྀ"(U+0F76).\n'
-              'If 0, generate only decomposed characters (i.e. NFD) (e.g. "ྲྀ" (U+0FB2 '
-              'U+0F80).',
+              ('Flag to tell whether or not to generate precomposed characters.\n'
+               'If 1 (the default), generate precomposed characters (i.e. NFC) if available '
+               '(e.g. "ྲྀ"(U+0F76).\n'
+               'If 0, generate only decomposed characters (i.e. NFD) (e.g. "ྲྀ" (U+0FB2 '
+               'U+0F80).'),
               '1')])
 
     def test_get_variables_hi_itrans(self) -> None:
@@ -1524,9 +1524,9 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('trim-last-halant',
-              'If this variable is 1 (the default), the last Halant in a syllable\n'
-              'is removed if it is followed by non Devanagari letter.  For instance,\n'
-              'typing "har.." produces "हर।", not "हर्।".',
+              ('If this variable is 1 (the default), the last Halant in a syllable\n'
+               'is removed if it is followed by non Devanagari letter.  For instance,\n'
+               'typing "har.." produces "हर।", not "हर्।".'),
               '1')])
 
     def test_get_variables_ja_anthy(self) -> None:
@@ -1546,10 +1546,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10'),
              ('show-lookup', 'Show lookup table', '0')])
 
@@ -1558,9 +1558,9 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('trim-last-halant',
-              'If this variable is 1 (the default), the last Halant in a syllable\n'
-              'is removed if it is followed by non Devanagari letter.  For instance,\n'
-              'typing "har.." produces "हर।", not "हर्।".',
+              ('If this variable is 1 (the default), the last Halant in a syllable\n'
+               'is removed if it is followed by non Devanagari letter.  For instance,\n'
+               'typing "har.." produces "हर।", not "हर्।".'),
               '1')])
 
     def test_get_variables_oj_phonetic(self) -> None:
@@ -1587,8 +1587,8 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('use-surrounding-text',
-              'Surrounding text vs. preedit.\n'
-              'If 1, try to use surrounding text.  Otherwise, use preedit.',
+              ('Surrounding text vs. preedit.\n'
+               'If 1, try to use surrounding text.  Otherwise, use preedit.'),
               '0')])
 
     def test_get_variables_ta_lk_renganathan(self) -> None:
@@ -1596,8 +1596,8 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('use-surrounding-text',
-              'Surrounding text vs. preedit\n'
-              'If 1, try to use surrounding text.  Otherwise, use preedit.',
+              ('Surrounding text vs. preedit\n'
+               'If 1, try to use surrounding text.  Otherwise, use preedit.'),
               '0')])
 
     def test_get_variables_th_kesmanee(self) -> None:
@@ -1605,10 +1605,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('level',
-              'Acceptance level\n'
-              'The level of character sequence acceptance defined in WTT 2.0.\n'
-              '0 accepts any key sequence.  2 accepts only orthographic ones.\n'
-              '1 is somewhere between.',
+              ('Acceptance level\n'
+               'The level of character sequence acceptance defined in WTT 2.0.\n'
+               '0 accepts any key sequence.  2 accepts only orthographic ones.\n'
+               '1 is somewhere between.'),
               '1')])
 
     def test_get_variables_th_pattachote(self) -> None:
@@ -1616,10 +1616,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('level',
-              'Acceptance level\n'
-              'The level of character sequence acceptance defined in WTT 2.0.\n'
-              '0 accepts any key sequence.  2 accepts only orthographic ones.\n'
-              '1 is somewhere between.',
+              ('Acceptance level\n'
+               'The level of character sequence acceptance defined in WTT 2.0.\n'
+               '0 accepts any key sequence.  2 accepts only orthographic ones.\n'
+               '1 is somewhere between.'),
               '1')])
 
     def test_get_variables_th_tis820(self) -> None:
@@ -1627,10 +1627,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('level',
-              'Acceptance level\n'
-              'The level of character sequence acceptance defined in WTT 2.0.\n'
-              '0 accepts any key sequence.  2 accepts only orthographic ones.\n'
-              '1 is somewhere between.',
+              ('Acceptance level\n'
+               'The level of character sequence acceptance defined in WTT 2.0.\n'
+               '0 accepts any key sequence.  2 accepts only orthographic ones.\n'
+               '1 is somewhere between.'),
               '1')])
 
     def test_get_variables_t_unicode(self) -> None:
@@ -1638,8 +1638,8 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('prompt',
-              'Preedit prompt\n'
-              'Prompt string shown in the preedit area while typing hexadecimal numbers.',
+              ('Preedit prompt\n'
+               'Prompt string shown in the preedit area while typing hexadecimal numbers.'),
               'U+')])
 
     @unittest.skipUnless(
@@ -1650,10 +1650,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     @unittest.skipUnless(
@@ -1664,10 +1664,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     @unittest.skipUnless(
@@ -1678,10 +1678,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     def test_get_variables_vi_tcvn(self) -> None:
@@ -1689,17 +1689,17 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('tone-mark-on-last',
-              'Flag to control tone mark position in equivocal cases.\n'
-              'If this variable is 0 (the default), put tone mark on the first vowel\n'
-              'in such equivocal cases as "oa", "oe", "uy".\n'
-              'Otherwise, put tone mark on the last vowel.',
+              ('Flag to control tone mark position in equivocal cases.\n'
+               'If this variable is 0 (the default), put tone mark on the first vowel\n'
+               'in such equivocal cases as "oa", "oe", "uy".\n'
+               'Otherwise, put tone mark on the last vowel.'),
               '0'),
              ('backspace-is-undo',
-              'Flag to control the action of Backspace key (delete or undo).\n'
-              'If this variable is 0 (the default), Backspace key deletes the previous\n'
-              'character (e.g. "q u a i s BS" => "quá").\n'
-              'If the value is 1, Backspace key undoes the previous key\n'
-              '(e.g. "q u a i s BS" => "quai").',
+              ('Flag to control the action of Backspace key (delete or undo).\n'
+               'If this variable is 0 (the default), Backspace key deletes the previous\n'
+               'character (e.g. "q u a i s BS" => "quá").\n'
+               'If the value is 1, Backspace key undoes the previous key\n'
+               '(e.g. "q u a i s BS" => "quai").'),
               '0')])
 
     def test_get_variables_vi_telex(self) -> None:
@@ -1707,17 +1707,17 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('tone-mark-on-last',
-              'Flag to control tone mark position in equivocal cases.\n'
-              'If this variable is 0 (the default), put tone mark on the first vowel\n'
-              'in such equivocal cases as "oa", "oe", "uy".\n'
-              'Otherwise, put tone mark on the last vowel.',
+              ('Flag to control tone mark position in equivocal cases.\n'
+               'If this variable is 0 (the default), put tone mark on the first vowel\n'
+               'in such equivocal cases as "oa", "oe", "uy".\n'
+               'Otherwise, put tone mark on the last vowel.'),
               '0'),
              ('backspace-is-undo',
-              'Flag to control the action of Backspace key (delete or undo).\n'
-              'If this variable is 0 (the default), Backspace key deletes the previous\n'
-              'character (e.g. "q u a i s BS" => "quá").\n'
-              'If the value is 1, Backspace key undoes the previous key\n'
-              '(e.g. "q u a i s BS" => "quai").',
+              ('Flag to control the action of Backspace key (delete or undo).\n'
+               'If this variable is 0 (the default), Backspace key deletes the previous\n'
+               'character (e.g. "q u a i s BS" => "quá").\n'
+               'If the value is 1, Backspace key undoes the previous key\n'
+               '(e.g. "q u a i s BS" => "quai").'),
               '0')])
 
     def test_get_variables_vi_viqr(self) -> None:
@@ -1725,17 +1725,17 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('tone-mark-on-last',
-              'Flag to control tone mark position in equivocal cases.\n'
-              'If this variable is 0 (the default), put tone mark on the first vowel\n'
-              'in such equivocal cases as "oa", "oe", "uy".\n'
-              'Otherwise, put tone mark on the last vowel.',
+              ('Flag to control tone mark position in equivocal cases.\n'
+               'If this variable is 0 (the default), put tone mark on the first vowel\n'
+               'in such equivocal cases as "oa", "oe", "uy".\n'
+               'Otherwise, put tone mark on the last vowel.'),
               '0'),
              ('backspace-is-undo',
-              'Flag to control the action of Backspace key (delete or undo).\n'
-              'If this variable is 0 (the default), Backspace key deletes the previous\n'
-              'character (e.g. "q u a i s BS" => "quá").\n'
-              'If the value is 1, Backspace key undoes the previous key\n'
-              '(e.g. "q u a i s BS" => "quai").',
+              ('Flag to control the action of Backspace key (delete or undo).\n'
+               'If this variable is 0 (the default), Backspace key deletes the previous\n'
+               'character (e.g. "q u a i s BS" => "quá").\n'
+               'If the value is 1, Backspace key undoes the previous key\n'
+               '(e.g. "q u a i s BS" => "quai").'),
               '0')])
 
     def test_get_variables_vi_vni(self) -> None:
@@ -1743,17 +1743,17 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('tone-mark-on-last',
-              'Flag to control tone mark position in equivocal cases.\n'
-              'If this variable is 0 (the default), put tone mark on the first vowel\n'
-              'in such equivocal cases as "oa", "oe", "uy".\n'
-              'Otherwise, put tone mark on the last vowel.',
+              ('Flag to control tone mark position in equivocal cases.\n'
+               'If this variable is 0 (the default), put tone mark on the first vowel\n'
+               'in such equivocal cases as "oa", "oe", "uy".\n'
+               'Otherwise, put tone mark on the last vowel.'),
               '0'),
              ('backspace-is-undo',
-              'Flag to control the action of Backspace key (delete or undo).\n'
-              'If this variable is 0 (the default), Backspace key deletes the previous\n'
-              'character (e.g. "q u a i s BS" => "quá").\n'
-              'If the value is 1, Backspace key undoes the previous key\n'
-              '(e.g. "q u a i s BS" => "quai").',
+              ('Flag to control the action of Backspace key (delete or undo).\n'
+               'If this variable is 0 (the default), Backspace key deletes the previous\n'
+               'character (e.g. "q u a i s BS" => "quá").\n'
+               'If the value is 1, Backspace key undoes the previous key\n'
+               '(e.g. "q u a i s BS" => "quai").'),
               '0')])
 
     @unittest.skipUnless(
@@ -1764,10 +1764,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     @unittest.skipUnless(
@@ -1778,16 +1778,16 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10'),
              ('candidates-charset',
-              'Character set to limit candidates.\n'
-              'Value must be a symbol representing a charater set, or nil.\n'
-              'If the value is not nil, a candidate containing a character not belonging\n'
-              'to the specified character set is ignored.',
+              ('Character set to limit candidates.\n'
+               'Value must be a symbol representing a charater set, or nil.\n'
+               'If the value is not nil, a candidate containing a character not belonging\n'
+               'to the specified character set is ignored.'),
               'big5')])
 
     @unittest.skipUnless(
@@ -1798,16 +1798,16 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10'),
              ('candidates-charset',
-              'Character set to limit candidates.\n'
-              'Value must be a symbol representing a charater set, or nil.\n'
-              'If the value is not nil, a candidate containing a character not belonging\n'
-              'to the specified character set is ignored.',
+              ('Character set to limit candidates.\n'
+               'Value must be a symbol representing a charater set, or nil.\n'
+               'If the value is not nil, a candidate containing a character not belonging\n'
+               'to the specified character set is ignored.'),
               'gb2312.1980')])
 
     @unittest.skipUnless(
@@ -1818,10 +1818,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     @unittest.skipUnless(
@@ -1832,10 +1832,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     @unittest.skipUnless(
@@ -1846,16 +1846,16 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10'),
              ('candidates-charset',
-              'Character set to limit candidates.\n'
-              'Value must be a symbol representing a charater set, or nil.\n'
-              'If the value is not nil, a candidate containing a character not belonging\n'
-              'to the specified character set is ignored.',
+              ('Character set to limit candidates.\n'
+               'Value must be a symbol representing a charater set, or nil.\n'
+               'If the value is not nil, a candidate containing a character not belonging\n'
+               'to the specified character set is ignored.'),
               'big5')])
 
     @unittest.skipUnless(
@@ -1866,16 +1866,16 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10'),
              ('candidates-charset',
-              'Character set to limit candidates.\n'
-              'Value must be a symbol representing a charater set, or nil.\n'
-              'If the value is not nil, a candidate containing a character not belonging\n'
-              'to the specified character set is ignored.',
+              ('Character set to limit candidates.\n'
+               'Value must be a symbol representing a charater set, or nil.\n'
+               'If the value is not nil, a candidate containing a character not belonging\n'
+               'to the specified character set is ignored.'),
               'gb2312.1980')])
 
     @unittest.skipUnless(
@@ -1886,10 +1886,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     @unittest.skipUnless(
@@ -1900,10 +1900,10 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('candidates-group-size',
-              'Maximum number of candidates in a candidate group.\n'
-              'Value must be an integer.\n'
-              'If the value is not positive, number of candidates in a group is decided\n'
-              'by how candiates are grouped in an input method source file.',
+              ('Maximum number of candidates in a candidate group.\n'
+               'Value must be an integer.\n'
+               'If the value is not positive, number of candidates in a group is decided\n'
+               'by how candiates are grouped in an input method source file.'),
               '10')])
 
     def test_set_variables(self) -> None:
@@ -1913,15 +1913,15 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans_bn_national_jatiya.get_variables(),
             [('use-automatic-vowel-forming',
-              'If this variable is 1 (the default), automatic vowel forming is used.\n'
-              'For example, a dependent vowel like া is automatically converted to\n'
-              'the independent form আ if it is not typed after a consonant.',
+              ('If this variable is 1 (the default), automatic vowel forming is used.\n'
+               'For example, a dependent vowel like া is automatically converted to\n'
+               'the independent form আ if it is not typed after a consonant.'),
               '1')])
         self.assertEqual(
             trans_t_unicode.get_variables(),
             [('prompt',
-              'Preedit prompt\n'
-              'Prompt string shown in the preedit area while typing hexadecimal numbers.',
+              ('Preedit prompt\n'
+               'Prompt string shown in the preedit area while typing hexadecimal numbers.'),
               'U+')])
         self.assertEqual(
             trans_ja_anthy.get_variables(),
@@ -1933,15 +1933,15 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans_bn_national_jatiya.get_variables(),
             [('use-automatic-vowel-forming',
-              'If this variable is 1 (the default), automatic vowel forming is used.\n'
-              'For example, a dependent vowel like া is automatically converted to\n'
-              'the independent form আ if it is not typed after a consonant.',
+              ('If this variable is 1 (the default), automatic vowel forming is used.\n'
+               'For example, a dependent vowel like া is automatically converted to\n'
+               'the independent form আ if it is not typed after a consonant.'),
               '0')])
         self.assertEqual(
             trans_t_unicode.get_variables(),
             [('prompt',
-              'Preedit prompt\n'
-              'Prompt string shown in the preedit area while typing hexadecimal numbers.',
+              ('Preedit prompt\n'
+               'Prompt string shown in the preedit area while typing hexadecimal numbers.'),
               'U+')])
         self.assertEqual(
             trans_ja_anthy.get_variables(),
@@ -1953,15 +1953,15 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans_bn_national_jatiya.get_variables(),
             [('use-automatic-vowel-forming',
-              'If this variable is 1 (the default), automatic vowel forming is used.\n'
-              'For example, a dependent vowel like া is automatically converted to\n'
-              'the independent form আ if it is not typed after a consonant.',
+              ('If this variable is 1 (the default), automatic vowel forming is used.\n'
+               'For example, a dependent vowel like া is automatically converted to\n'
+               'the independent form আ if it is not typed after a consonant.'),
               '0')])
         self.assertEqual(
             trans_t_unicode.get_variables(),
             [('prompt',
-              'Preedit prompt\n'
-              'Prompt string shown in the preedit area while typing hexadecimal numbers.',
+              ('Preedit prompt\n'
+               'Prompt string shown in the preedit area while typing hexadecimal numbers.'),
               'U_')])
         self.assertEqual(
             trans_ja_anthy.get_variables(),
@@ -1973,15 +1973,15 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans_bn_national_jatiya.get_variables(),
             [('use-automatic-vowel-forming',
-              'If this variable is 1 (the default), automatic vowel forming is used.\n'
-              'For example, a dependent vowel like া is automatically converted to\n'
-              'the independent form আ if it is not typed after a consonant.',
+              ('If this variable is 1 (the default), automatic vowel forming is used.\n'
+               'For example, a dependent vowel like া is automatically converted to\n'
+               'the independent form আ if it is not typed after a consonant.'),
               '0')])
         self.assertEqual(
             trans_t_unicode.get_variables(),
             [('prompt',
-              'Preedit prompt\n'
-              'Prompt string shown in the preedit area while typing hexadecimal numbers.',
+              ('Preedit prompt\n'
+               'Prompt string shown in the preedit area while typing hexadecimal numbers.'),
               'U_')])
         self.assertEqual(
             trans_ja_anthy.get_variables(),
@@ -2045,9 +2045,9 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(
             trans.get_variables(),
             [('use-automatic-vowel-forming',
-              'If this variable is 1 (the default), automatic vowel forming is used.\n'
-              'For example, a dependent vowel like া is automatically converted to\n'
-              'the independent form আ if it is not typed after a consonant.',
+              ('If this variable is 1 (the default), automatic vowel forming is used.\n'
+               'For example, a dependent vowel like া is automatically converted to\n'
+               'the independent form আ if it is not typed after a consonant.'),
               '1')])
         self.assertEqual(trans.transliterate(['a']), 'ঋ')  # U+098B BENGALI LETTER VOCALIC R
         trans.set_variables({'use-automatic-vowel-forming': '0'})

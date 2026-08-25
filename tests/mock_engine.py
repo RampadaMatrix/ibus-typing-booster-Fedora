@@ -19,7 +19,6 @@
 '''
 
 from typing import Any
-from typing import List
 from typing import Optional
 from typing import Callable
 # pylint: disable=wrong-import-position
@@ -66,8 +65,8 @@ class MockEngine:
         self.mock_preedit_focus_mode = IBus.PreeditFocusMode.COMMIT
         self.mock_committed_text = ''
         self.mock_committed_text_cursor_pos = 0
-        self.mock_committed_text_codes: List[int] = []
-        self.mock_committed_text_states: List[int] = []
+        self.mock_committed_text_codes: list[int] = []
+        self.mock_committed_text_states: list[int] = []
         self.client_capabilities = (
             IBus.Capabilite.PREEDIT_TEXT
             | IBus.Capabilite.AUXILIARY_TEXT
@@ -154,7 +153,7 @@ class MockEngine:
     def show_preedit_text(self) -> None:
         pass
 
-    def register_properties(self, property_list: List[IBus.Property]) -> None:
+    def register_properties(self, property_list: list[IBus.Property]) -> None:
         pass
 
     def update_property(self, _prop: IBus.Property) -> None:
@@ -195,7 +194,7 @@ class MockLookupTable:
         self.mock_cursor_pos = cursor_pos
         self.mock_cursor_visible = cursor_visible
         self.mock_wrap_around = wrap_around
-        self.mock_candidates: List[str] = []
+        self.mock_candidates: list[str] = []
         self.mock_orientation = 0
 
     def clear(self) -> None:
@@ -258,7 +257,7 @@ class MockLookupTable:
 
 class MockPropList:
     def __init__(self) -> None:
-        self.mock_prop_list: List[IBus.Property] = []
+        self.mock_prop_list: list[IBus.Property] = []
 
     def append(self, prop: IBus.Property) -> None:
         self.mock_prop_list.append(prop)

@@ -657,7 +657,7 @@ class EmojiMatcher:
     # still entries in the cache for that instance. But if all entries
     # referring to a self are evicted, then self can be garbage
     # collected properly.
-    @functools.lru_cache(maxsize=500_000)
+    @functools.lru_cache(maxsize=500_000)  # noqa: B019
     def variation_selector_normalize(
             self, emoji_string: str, variation_selector: str ='emoji') -> str:
         # pylint: disable=line-too-long
@@ -2088,7 +2088,7 @@ class EmojiMatcher:
     # still entries in the cache for that instance. But if all entries
     # referring to a self are evicted, then self can be garbage
     # collected properly.
-    @functools.lru_cache(maxsize=500_000)
+    @functools.lru_cache(maxsize=500_000)  # noqa: B019
     def get_all_label_words(self, emoji_key: tuple[str, str]) -> set[str]:
         '''Returns all words in all labels of an emoji'''
         emoji_value = self._emoji_dict.get(emoji_key, None)

@@ -21,12 +21,11 @@
 This file implements test cases for miscellaneous stuff in tabsqlitedb.py.
 '''
 from types import ModuleType
-from typing import Iterable
-from typing import Dict
 from typing import Union
 from typing import Callable
 from typing import Optional
 from typing import TextIO
+from collections.abc import Iterable
 import sys
 import os
 import gzip
@@ -121,8 +120,8 @@ class TabSqliteDbTestCase(unittest.TestCase):
     def simulate_typing_file(
             self,
             path: str,
-            verbose: bool = True) -> Dict[str, Union[int, float]]:
-        stats: Dict[str, Union[int, float]] = {
+            verbose: bool = True) -> dict[str, Union[int, float]]:
+        stats: dict[str, Union[int, float]] = {
             'typed': 0, 'committed': 0, 'saved': 0, 'percent': 0.0}
         if '/' not in path:
             path = os.path.join(os.path.dirname(__file__), path)
@@ -144,10 +143,8 @@ class TabSqliteDbTestCase(unittest.TestCase):
         total_length_committed = 0
         total_length_saved = 0
         total_percent_saved = 0.0
-        current_line = 0
         total_lines = len(lines)
-        for line in lines:
-            current_line += 1
+        for current_line, line in enumerate(lines, start=1):
             for token in itb_util_core.tokenize(line):
                 length_typed = 0
                 length_saved = 0

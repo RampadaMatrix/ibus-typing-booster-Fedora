@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-#
 # ibus-typing-booster - A completion input method for IBus
 #
 # Copyright (c) 2016 Mike FABIAN <mfabian@redhat.com>
@@ -68,8 +66,8 @@ def init_libvoikko_error() -> str:
             voikko = libvoikko.Voikko('fi')
             if voikko:
                 return ''
-            return 'Intialization of Voikko failed: object empty'
-        except (libvoikko.VoikkoException,) as error:
+            return 'Initialization of Voikko failed: object empty'
+        except libvoikko.VoikkoException as error:
             return str(error)
     return 'import libvoikko failed.'
 
@@ -112,9 +110,7 @@ def enchant_sanity_test(language: str = '', word: str = '') -> bool:
     if enchant is None:
         return False
     enchant_dictionary = enchant.Dict(language)
-    if enchant_dictionary.suggest(word):
-        return True
-    return  False
+    return bool(enchant_dictionary.suggest(word))
 
 def enchant_working_as_expected() -> bool:
     '''Checks if the behaviour has changed somehow.
@@ -137,9 +133,7 @@ def enchant_working_as_expected() -> bool:
     enchant_dictionary = enchant.Dict('en_US')
     if enchant_dictionary.check('hedgehgo'):
         return False
-    if 'hedgehog' not in enchant_dictionary.suggest('hedgehgo'):
-        return False
-    return True
+    return 'hedgehog' in enchant_dictionary.suggest('hedgehgo')
 
 def set_locale_error(locale_name: str) -> str:
     '''
@@ -162,5 +156,5 @@ def set_locale_error(locale_name: str) -> str:
         locale.setlocale(locale.LC_CTYPE, locale_name)
         locale.setlocale(locale.LC_CTYPE, old_locale_name)
         return ''
-    except (locale.Error,) as error:
-        return f'{locale_name}: {str(error)}'
+    except locale.Error as error:
+        return f'{locale_name}: {error!s}'

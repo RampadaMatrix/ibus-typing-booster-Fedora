@@ -728,7 +728,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
             key=lambda x: (
                 # For Japanese and Chinese: sort Chinese
                 # characters before Hiragana and Latin:
-                (language.startswith('ja') or language.startswith('zh'))
+                language.startswith(('ja', 'zh'))
                 and not unicodedata.name(x[0]).startswith('CJK'),
                 language.startswith('ja')
                 and not unicodedata.name(x[0]).startswith('HIRAGANA'),
@@ -1020,13 +1020,10 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
                 with open(self._options_file,
                           encoding='UTF-8') as options_file:
                     options_dict = ast.literal_eval(options_file.read())
-            except (PermissionError, SyntaxError, IndentationError) as error:
-                LOGGER.exception('Error when reading options: %s: %s',
-                                 error.__class__.__name__, error)
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception(
-                    'Unexpected error when reading options: %s: %s',
-                    error.__class__.__name__, error)
+            except (PermissionError, SyntaxError, IndentationError):
+                LOGGER.exception('Error when reading options')
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Unexpected error when reading options')
             else: # no exception occured
                 if _ARGS.debug:
                     LOGGER.debug(
@@ -1086,13 +1083,10 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
                           encoding='UTF-8') as recently_used_file:
                     recently_used_emoji = ast.literal_eval(
                         recently_used_file.read())
-            except (PermissionError, SyntaxError, IndentationError) as error:
-                LOGGER.exception('Error reading recently used emoji: %s: %s',
-                                 error.__class__.__name__, error)
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception(
-                    'Unexpected error reading recently used emoji: %s: %s',
-                    error.__class__.__name__, error)
+            except (PermissionError, SyntaxError, IndentationError):
+                LOGGER.exception('Error reading recently used emoji')
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Unexpected error reading recently used emoji')
             else: # no exception occured
                 if _ARGS.debug:
                     LOGGER.debug(
@@ -1682,9 +1676,7 @@ class EmojiPickerUI(Gtk.Window): # type: ignore[misc]
         '''
         if not self._fallback:
             return False
-        if not itb_pango.emoji_font_fallback_needed(self._font, emoji):
-            return False
-        return True
+        return itb_pango.emoji_font_fallback_needed(self._font, emoji)
 
     def _parse_emoji_and_name_from_text( # pylint: disable=no-self-use
             self, text: str) -> tuple[str, str]:

@@ -382,7 +382,7 @@ class ItbTestCase(unittest.TestCase):
         except ValueError as error:
             trans = None
             self.skipTest(error)
-        except Exception as error: # pylint: disable=broad-except
+        except Exception as error: # pylint: disable=broad-except  # noqa: BLE001
             sys.stderr.write('Unexpected exception!')
             trans = None
             self.skipTest(error)
@@ -3850,8 +3850,8 @@ class ItbTestCase(unittest.TestCase):
         self.engine.do_process_key_event(IBus.KEY_s, 0, 0)
         self.engine.do_process_key_event(IBus.KEY_a, 0, 0)
         candidate_phrases_found = set()
-        candidate_phrases = set(
-            ('kiss', 'kissa', 'Kiassa', 'kissaa', 'kisassa', 'kisussa'))
+        candidate_phrases = {
+            'kiss', 'kissa', 'Kiassa', 'kissaa', 'kisassa', 'kisussa'}
         for candidate in self.engine._candidates:
             if candidate.phrase in candidate_phrases:
                 self.assertTrue(candidate.user_freq < 0)

@@ -243,8 +243,7 @@ def get_ramalama_shortnames() -> dict[str, str]:
         try:
             result = subprocess.run(
                 [ramalama_binary, 'info'],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 encoding='utf-8', check=True)
             data = json.loads(result.stdout.strip())
             shortnames = data.get('Shortnames', {})

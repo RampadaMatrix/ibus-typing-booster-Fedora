@@ -23,14 +23,13 @@ This module must not import Gtk or Gdk or require a display.
 '''
 from types import ModuleType
 from typing import Any
-from typing import DefaultDict
 from typing import Optional
 from typing import Union
-from typing import Iterable
-from typing import Pattern
 from typing import TYPE_CHECKING
 from typing import Literal
+from typing import cast
 from enum import IntFlag
+import types
 import sys
 import os
 import functools
@@ -49,6 +48,7 @@ import ctypes.util
 import xml.etree.ElementTree
 from dataclasses import dataclass
 from collections import defaultdict
+from collections.abc import Iterable
 # pylint: disable=wrong-import-position
 from gi import require_version
 require_version('IBus', '1.0')
@@ -72,6 +72,7 @@ except ImportError:
     import re
     USING_REGEX = False
 from re import Match  # pylint: disable=wrong-import-order  # for type checking
+from re import Pattern  # pylint: disable=wrong-import-order  # for type checking
 
 distro: Optional[ModuleType]
 try:
@@ -111,7 +112,7 @@ except ImportError:
 
 pycountry: Optional[ModuleType]
 try:
-    import pycountry as _pycountry  # type: ignore[import-not-found]  # ty: ignore[unresolved-import]
+    import pycountry as _pycountry  # type: ignore[import-not-found]  # ty: ignore[unresolved-import]  # pylint: disable=line-too-long
     pycountry = _pycountry
 except ImportError:
     pycountry = None
@@ -3703,8 +3704,7 @@ def ibus_write_cache() -> bool:
     try:
         _result = subprocess.run(
             [ibus_binary, 'write-cache'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             encoding='utf-8',
             check=True,
             timeout=30)
@@ -3732,8 +3732,7 @@ def ibus_read_cache() -> dict[str, dict[str, str]]:
     try:
         result = subprocess.run(
             [ibus_binary, 'read-cache'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             encoding='utf-8', check=True)
         result_dict = {}
         root = xml.etree.ElementTree.fromstring(result.stdout)
@@ -3847,7 +3846,7 @@ def merge_dicts_max(*dicts: dict[str, int]) -> dict[str, int]:
         {}
 
     '''
-    max_values: DefaultDict[str, int] = defaultdict(lambda: -sys.maxsize - 1)
+    max_values: defaultdict[str, int] = defaultdict(lambda: -sys.maxsize - 1)
     for d in dicts:
         for key, value in d.items():
             max_values[key] = max(max_values[key], value)
@@ -3875,9 +3874,9 @@ def dict_update_existing_keys(
     >>> sorted(old_pdict.items())
     [('a', 1), ('b', 3), ('c', 4)]
     '''
-    for key in other_pdict:
+    for key, value in other_pdict.items():
         if key in pdict:
-            pdict[key] = other_pdict[key]
+            pdict[key] = value
 
 def utf8_safe_truncate(text: str, max_bytes: int) -> bytes:
     '''
@@ -4292,10 +4291,10 @@ class Capabilite(IntFlag):
     def __int__(self) -> int:
         return int(self._value_)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if (self.__class__ is other.__class__
             or other.__class__ is IBus.Capabilite):
-            return bool(int(self) == int(other))
+            return bool(int(self) == int(cast(int, other)))
         if other.__class__ is int or other.__class__ is float:
             return bool(int(self) == other)
         return NotImplemented
@@ -4473,17 +4472,13 @@ class ComposeSequences:
         #
         # Add them automatically as soon as they start to exist:
         if hasattr(IBus, 'KEY_dead_lowline'):
-            self._preedit_representations[
-                getattr(IBus, 'KEY_dead_lowline')] = '_'
+            self._preedit_representations[IBus.KEY_dead_lowline] = '_'
         if hasattr(IBus, 'KEY_dead_aboveverticalline'):
-            self._preedit_representations[
-                getattr(IBus, 'KEY_dead_aboveverticalline')] = '\u00A0\u030D'
+            self._preedit_representations[IBus.KEY_dead_aboveverticalline] = '\u00A0\u030D'
         if hasattr(IBus, 'KEY_dead_belowverticalline'):
-            self._preedit_representations[
-                getattr(IBus, 'KEY_dead_belowverticalline')] = '\u00A0\u0329'
+            self._preedit_representations[IBus.KEY_dead_belowverticalline] = '\u00A0\u0329'
         if hasattr(IBus, 'KEY_dead_longsolidusoverlay'):
-            self._preedit_representations[
-                getattr(IBus, 'KEY_dead_longsolidusoverlay')] = '\u00A0\u0338'
+            self._preedit_representations[IBus.KEY_dead_longsolidusoverlay] = '\u00A0\u0338'
         self._dead_keys = {
             # See also /usr/include/X11/keysymdef.h and
             # ibus/src/ibusenginesimple.c
@@ -4577,17 +4572,13 @@ class ComposeSequences:
         #
         # Add them automatically as soon as they start to exist:
         if hasattr(IBus, 'KEY_dead_lowline'):
-            self._dead_keys[
-                getattr(IBus, 'KEY_dead_lowline')] = '\u0332'
+            self._dead_keys[IBus.KEY_dead_lowline] = '\u0332'
         if hasattr(IBus, 'KEY_dead_aboveverticalline'):
-            self._dead_keys[
-                getattr(IBus, 'KEY_dead_aboveverticalline')] = '\u030D'
+            self._dead_keys[IBus.KEY_dead_aboveverticalline] = '\u030D'
         if hasattr(IBus, 'KEY_dead_belowverticalline'):
-            self._dead_keys[
-                getattr(IBus, 'KEY_dead_belowverticalline')] = '\u0329'
+            self._dead_keys[IBus.KEY_dead_belowverticalline] = '\u0329'
         if hasattr(IBus, 'KEY_dead_longsolidusoverlay'):
-            self._dead_keys[
-                getattr(IBus, 'KEY_dead_longsolidusoverlay')] = '\u0338'
+            self._dead_keys[IBus.KEY_dead_longsolidusoverlay] = '\u0338'
         self._compose_sequences: dict[int, Any] = {}
         compose_file_paths = []
         # Gtk reads compose files like this:
@@ -5450,8 +5441,7 @@ class M17nDbInfo:
             try:
                 result = subprocess.run(
                     [m17n_db_binary, '-v'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    capture_output=True,
                     encoding='utf-8', check=True)
                 self._version = result.stdout.strip()
                 LOGGER.info('%s printed: %s', m17n_db_binary, self._version)
@@ -5485,8 +5475,7 @@ class M17nDbInfo:
             try:
                 result = subprocess.run(
                     [m17n_db_binary],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    capture_output=True,
                     encoding='utf-8', check=True)
                 system_dir = result.stdout.strip()
                 LOGGER.info('%s printed: %s', m17n_db_binary, system_dir)
@@ -6065,8 +6054,8 @@ class HotKeys:
     '''
     def __init__(self, keybindings: dict[str, list[str]]) -> None:
         self._hotkeys: dict[str, list[tuple[int, int]]] = {}
-        for command in keybindings:
-            for keybinding in keybindings[command]:
+        for command, value in keybindings.items():
+            for keybinding in value:
                 key = keybinding_to_keyevent(keybinding)
                 val = key.val
                 state = key.state & KEYBINDING_STATE_MASK
@@ -6153,7 +6142,7 @@ class MicrophoneStream:
         # Create a thread-safe buffer of audio data
         self.closed = True
         self._buff: queue.Queue[Any] = queue.Queue()
-        self._audio_interface: Optional['_pyaudio.PyAudio'] = None
+        self._audio_interface: Optional['_pyaudio.PyAudio'] = None  # noqa: UP037
         self._audio_stream: Optional[Any] = None
         if pyaudio is None:
             raise RuntimeError('PyAudio is not installed')
@@ -6182,7 +6171,11 @@ class MicrophoneStream:
         self.closed = False
         return self
 
-    def __exit__(self, _type: Any, _value: Any, _traceback: Any) -> None:
+    def __exit__(
+            self,
+            _type: Optional[type[BaseException]],
+            _value: Optional[BaseException],
+            _traceback: Optional[types.TracebackType]) -> None:
         if self._audio_stream:
             self._audio_stream.stop_stream()
             self._audio_stream.close()

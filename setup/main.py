@@ -21,11 +21,6 @@
 '''
 The setup tool for ibus typing booster.
 '''
-
-from typing import Tuple
-from typing import List
-from typing import Dict
-from typing import Set
 from typing import Union
 from typing import Any
 from typing import Optional
@@ -114,7 +109,7 @@ from i18n import _, init as i18n_init
 try:
     import itb_ollama
     IMPORT_ITB_OLLAMA_ERROR = None
-except (ImportError,) as error:
+except ImportError as error:
     IMPORT_ITB_OLLAMA_ERROR = error
 
 LOGGER = logging.getLogger('ibus-typing-booster')
@@ -187,7 +182,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
             schema_path = ('/org/freedesktop/ibus/engine/tb/'
                            f'{self._m17n_ime_lang}/{self._m17n_ime_name}/')
         title += f' {itb_version.get_version()}'
-        title += f', Gtk {".".join((str(i) for i in GTK_VERSION))}'
+        title += f', Gtk {".".join(str(i) for i in GTK_VERSION)}'
         Gtk.Window.__init__(self, title=title)
         self.set_title(title)
         self.set_name('TypingBoosterPreferences')
@@ -246,7 +241,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
             path=schema_path)
         self._settings_dict = self._init_settings_dict()
 
-        self._allowed_autosettings: Dict[str, Dict[str, str]] = {}
+        self._allowed_autosettings: dict[str, dict[str, str]] = {}
         schema_source: Gio.SettingsSchemaSource = (
             Gio.SettingsSchemaSource.get_default()) # pylint: disable=no-value-for-parameter
         schema: Gio.SettingsSchema = schema_source.lookup(
@@ -1282,7 +1277,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         add_child(dictionaries_action_area, self._dictionaries_default_button)
         self._dictionaries_listbox_selected_dictionary_name = ''
         self._dictionaries_listbox_selected_dictionary_index = -1
-        self._dictionary_names: List[str] = []
+        self._dictionary_names: list[str] = []
         dictionary = self._settings_dict['dictionary']['user']
         self._dictionary_names = itb_util_core.dictionaries_str_to_list(dictionary)
         if ','.join(self._dictionary_names) != dictionary:
@@ -1293,7 +1288,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
                 GLib.Variant.new_string(','.join(self._dictionary_names)))
         self._dictionaries_listbox: Gtk.ListBox = Gtk.ListBox()
         self._dictionaries_add_listbox: Gtk.ListBox = Gtk.ListBox()
-        self._dictionaries_add_listbox_dictionary_names: List[str] = []
+        self._dictionaries_add_listbox_dictionary_names: list[str] = []
         self._dictionaries_add_popover: Optional[Gtk.Popover] = None
         self._dictionaries_add_popover_scroll: Optional[Gtk.ScrolledWindow] = None
         self._fill_dictionaries_listbox()
@@ -1391,7 +1386,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         add_child(input_methods_action_area, self._input_methods_default_button)
         self._input_methods_listbox_selected_ime_name = ''
         self._input_methods_listbox_selected_ime_index = -1
-        self._current_imes: List[str] = []
+        self._current_imes: list[str] = []
         inputmethod = self._settings_dict['inputmethod']['user']
         self._current_imes = itb_util_core.input_methods_str_to_list(inputmethod)
         if ','.join(self._current_imes) != inputmethod:
@@ -1402,7 +1397,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
                 GLib.Variant.new_string(','.join(self._current_imes)))
         self._input_methods_listbox: Gtk.ListBox = Gtk.ListBox()
         self._input_methods_add_listbox: Gtk.ListBox = Gtk.ListBox()
-        self._input_methods_add_listbox_imes: List[str] = []
+        self._input_methods_add_listbox_imes: list[str] = []
         self._input_methods_add_popover: Optional[Gtk.Popover] = None
         self._input_methods_add_popover_scroll: Optional[Gtk.ScrolledWindow] = None
         self._input_methods_options_popover: Optional[Gtk.Popover] = None
@@ -2442,7 +2437,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         if IMPORT_ITB_OLLAMA_ERROR is not None:
             import_error_label = Gtk.Label(
                 label='❌️ Python import error: '
-                f'<span color="red">{str(IMPORT_ITB_OLLAMA_ERROR)}</span>',
+                f'<span color="red">{IMPORT_ITB_OLLAMA_ERROR!s}</span>',
                 use_markup=True)
             import_error_label.set_xalign(0)
             _ai_grid_row += 1
@@ -2708,7 +2703,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         self._autosettings_selected_index = -1
         self._autosettings_treeview = None
         self._autosettings_add_listbox = None
-        self._autosettings_add_listbox_settings: List[str] = []
+        self._autosettings_add_listbox_settings: list[str] = []
         self._autosettings_add_popover: Optional[Gtk.Popover] = None
         self._autosettings_add_popover_scroll = None
         self._fill_autosettings_treeview()
@@ -2723,7 +2718,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
         self._gsettings.connect('changed', self._on_gsettings_value_changed)
 
-    def _init_settings_dict(self) -> Dict[str, Any]:
+    def _init_settings_dict(self) -> dict[str, Any]:
         '''Initialize a dictionary with the default and user settings for all
         settings keys.
 
@@ -2739,7 +2734,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         Keeping a copy of the default settings in the settings dictionary
         makes it easy to revert some or all settings to the defaults.
         '''
-        settings_dict: Dict[str, Any] = {}
+        settings_dict: dict[str, Any] = {}
         set_functions = {
             'disableinterminals': self.set_disable_in_terminals,
             'asciidigits': self.set_ascii_digits,
@@ -2941,7 +2936,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         self._ai_model_combobox.handler_unblock(self._ai_model_combobox_changed_id)
         return True # keep running, GLib.timeout_add()
 
-    def _fill_dictionaries_listbox_row(self, name: str) -> Tuple[str, bool, str, str]:
+    def _fill_dictionaries_listbox_row(self, name: str) -> tuple[str, bool, str, str]:
         '''
         Formats the text of a line in the listbox of configured dictionaries
 
@@ -2965,7 +2960,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         dic_path: str = ''
         if name.split('_')[0] != 'fi':
             (dic_path,
-             dummy_aff_path) = itb_util_core.find_hunspell_dictionary(name)
+             _dummy_aff_path) = itb_util_core.find_hunspell_dictionary(name)
             if dic_path:
                 row_item += '✔️'
             else:
@@ -3045,7 +3040,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
             < itb_util_core.MAXIMUM_NUMBER_OF_DICTIONARIES)
 
     @staticmethod
-    def _fill_input_methods_listbox_row(ime: str) -> Tuple[str, str]:
+    def _fill_input_methods_listbox_row(ime: str) -> tuple[str, str]:
         '''
         Formats the text of a line in the listbox of configured input methods
 
@@ -4180,13 +4175,13 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
         Tries to install the appropriate dictionary packages.
         '''
-        missing_dictionary_packages: Set[str] = set()
+        missing_dictionary_packages: set[str] = set()
         for name in self._dictionary_names:
             if name.split('_')[0] == 'fi':
                 missing_dictionary_packages.add('python3-libvoikko')
             else:
                 (dic_path,
-                 dummy_aff_path) = itb_util_core.find_hunspell_dictionary(name)
+                 _dummy_aff_path) = itb_util_core.find_hunspell_dictionary(name)
                 if not dic_path:
                     if (itb_util_core.distro_id() in
                         ('opensuse',
@@ -4221,7 +4216,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
         Downloads missing dictionaries and updates existing dictionries
         '''
-        languages: Set[str] = {
+        languages: set[str] = {
             name for name in self._dictionary_names if name != 'None'}
         if not languages:
             return
@@ -4526,14 +4521,12 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
             return
         ime = self._input_methods_listbox_selected_ime_name
         LOGGER.debug('Option setup for %s', ime)
-        variables: List[Tuple[str, str, str]] = []
+        variables: list[tuple[str, str, str]] = []
         try:
             trans = m17n_translit.Transliterator(ime)
             variables = trans.get_variables()
-        except ValueError as error:
-            LOGGER.exception(
-                'Exception when opening ime %s: %s: %s',
-                ime, error.__class__.__name__, error)
+        except ValueError:
+            LOGGER.exception('Exception when opening ime %s', ime)
         if not variables:
             return
         self._input_methods_options_popover = create_popover(
@@ -4622,14 +4615,12 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         been edited in the treeview
         '''
         ime = self._input_methods_listbox_selected_ime_name
-        old_variables: List[Tuple[str, str, str]] = []
+        old_variables: list[tuple[str, str, str]] = []
         try:
             trans = m17n_translit.Transliterator(ime)
             old_variables = trans.get_variables()
-        except ValueError as error:
-            LOGGER.exception(
-                'Exception when opening ime %s: %s: %s',
-                ime, error.__class__.__name__, error)
+        except ValueError:
+            LOGGER.exception('Exception when opening ime %s', ime)
         if not old_variables:
             LOGGER.debug('Could not find any variables for ime %s', ime)
             return
@@ -4638,19 +4629,14 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         old_value = model.get_value(iterator, 2)
         try:
             trans.set_variables({old_name: new_edited_value})
-        except ValueError as error:
+        except ValueError:
             LOGGER.exception(
-                'Exception when setting %s to %s: %s: %s',
-                old_name, new_edited_value,
-                error.__class__.__name__, error)
+                'Exception when setting %s to %s', old_name, new_edited_value)
             LOGGER.debug('Trying to set default value now ...')
             try:
                 trans.set_variables({old_name: ''})
-            except ValueError as error2:
-                LOGGER.exception(
-                    'Exception when setting %s to %s: %s: %s',
-                    old_name, '',
-                    error.__class__.__name__, error2)
+            except ValueError:
+                LOGGER.exception('Exception when setting %s to %s', old_name, '')
                 LOGGER.debug('Giving up and returning.')
                 return
         variables = trans.get_variables()
@@ -4774,11 +4760,10 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
                 trans = m17n_translit.Transliterator(
                     self._input_methods_listbox_selected_ime_name)
                 variables = trans.get_variables()
-            except ValueError as error:
+            except ValueError:
                 LOGGER.exception(
-                    'Exception when opening ime %s: %s: %s',
-                    self._input_methods_listbox_selected_ime_name,
-                    error.__class__.__name__, error)
+                    'Exception when opening ime %s',
+                    self._input_methods_listbox_selected_ime_name)
             self._input_methods_options_button.set_sensitive(False)
             if variables:
                 self._input_methods_options_button.set_sensitive(True)
@@ -4862,28 +4847,22 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
                 try:
                     value_integer = int(new_edited_value)
                     new_edited_value = str(value_integer)
-                except (ValueError,) as error:
-                    LOGGER.exception(
-                        'Exception converting string to integer %s: %s',
-                        error.__class__.__name__, error)
+                except ValueError:
+                    LOGGER.exception('Exception converting string to integer')
                     new_edited_value = ''
             elif value_type in ('u', 't'): # uint32, uint64
                 try:
                     value_integer = max(0, int(new_edited_value))
                     new_edited_value = str(value_integer)
-                except (ValueError,) as error:
-                    LOGGER.exception(
-                        'Exception converting string to integer %s: %s',
-                        error.__class__.__name__, error)
+                except ValueError:
+                    LOGGER.exception('Exception converting string to integer')
                     new_edited_value = ''
             elif value_type == 'd': # double
                 try:
                     value_float = float(new_edited_value)
                     new_edited_value = str(value_float)
-                except (ValueError,) as error:
-                    LOGGER.exception(
-                        'Exception converting string to float %s: %s',
-                        error.__class__.__name__, error)
+                except ValueError:
+                    LOGGER.exception('Exception converting string to float')
                     new_edited_value = ''
             elif value_type == 'b':
                 if new_edited_value.lower().strip() in ('true', 'false'):
@@ -5225,7 +5204,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
         self._shortcut_treeview.get_selection().set_mode(Gtk.SelectionMode.NONE)
         self._shortcut_treeview_model.clear()
         self._shortcut_treeview.get_selection().set_mode(Gtk.SelectionMode.SINGLE)
-        current_shortcuts: List[Tuple[str, str]] = (
+        current_shortcuts: list[tuple[str, str]] = (
             self.tabsqlitedb.list_user_shortcuts())
         filter_words = itb_util_core.remove_accents(filter_text.lower()).split()
         for shortcut in current_shortcuts:
@@ -7179,9 +7158,8 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
             try:
                 error_sound_object.play()
                 error_sound_object.wait_done()
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception('Playing error sound failed: %s: %s',
-                                 error.__class__.__name__, error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Playing error sound failed')
 
     def set_sound_backend(
             self,
@@ -7212,9 +7190,8 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
             try:
                 error_sound_object.play()
                 error_sound_object.wait_done()
-            except Exception as error: # pylint: disable=broad-except
-                LOGGER.exception('Playing error sound failed: %s: %s',
-                                 error.__class__.__name__, error)
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception('Playing error sound failed')
 
     def set_debug_level(
             self,
@@ -7407,7 +7384,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
     def set_current_imes(
             self,
-            imes: Union[str, List[str], Any],
+            imes: Union[str, list[str], Any],
             update_gsettings: bool = True) -> None:
         '''Set current list of input methods
 
@@ -7446,7 +7423,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
     def set_dictionary_names(
             self,
-            dictionary_names: Union[str, List[str], Any],
+            dictionary_names: Union[str, list[str], Any],
             update_gsettings: bool = True) -> None:
         '''Set current dictionary names
 
@@ -7485,7 +7462,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
     def set_autosettings(
             self,
-            autosettings: Union[List[Tuple[str, str, str]], Any],
+            autosettings: Union[list[tuple[str, str, str]], Any],
             update_gsettings: bool = True) -> None:
         '''Set the current automatic settings
 
@@ -7517,7 +7494,7 @@ class SetupUI(Gtk.Window):  # type: ignore[misc]
 
     def set_keybindings(
             self,
-            keybindings: Union[Dict[str, List[str]], Any],
+            keybindings: Union[dict[str, list[str]], Any],
             update_gsettings: bool = True) -> None:
         '''Set current key bindings
 

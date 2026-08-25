@@ -22,20 +22,12 @@ pkginstall.py – Install missing dictionaries for ibus-typing-booster
 Uses pkcon (PackageKit) via Gio.Subprocess with a Gtk3 progress dialog.
 Works asynchronously and integrates smoothly with the main GTK mainloop.
 '''
-from typing import Set
-from typing import Dict
-from typing import List
 from typing import Any
 from typing import Optional
 from typing import Callable
-# pylint: disable=wrong-import-position
-import sys
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-# pylint: enable=wrong-import-position
+from typing import Literal
 import os
+import sys
 import re
 import signal
 import locale
@@ -63,7 +55,7 @@ CompleteCallback = Callable[[InstallStatus], None]
 LOGGER = logging.getLogger('ibus-typing-booster')
 
 def install_packages_async(
-    packages: Optional[Set[str]] = None,
+    packages: Optional[set[str]] = None,
     on_output: Optional[OutputCallback] = None,
     on_complete: Optional[CompleteCallback] = None,
 ) -> Optional[Gio.Subprocess]:
@@ -138,7 +130,7 @@ def install_packages_async(
     return proc
 
 def install_packages_sequentially_async(
-    packages: Set[str],
+    packages: set[str],
     on_output: Optional[OutputCallback] = None,
     on_complete: Optional[CompleteCallback] = None,
 ) -> Callable[[], None]:
@@ -146,8 +138,8 @@ def install_packages_sequentially_async(
 
     This avoids the 'already installed' fatal error that breaks multi-install.
     '''
-    package_list: List[str] = sorted(packages)
-    results: Dict[str, bool] = {}
+    package_list: list[str] = sorted(packages)
+    results: dict[str, bool] = {}
     current_proc: Optional[Gio.Subprocess] = None
     cancelled: bool = False
 
@@ -206,7 +198,7 @@ def install_packages_sequentially_async(
 
 def install_packages_with_dialog(
     parent: Optional[Gtk.Window],
-    packages: Set[str],
+    packages: set[str],
     on_complete: Optional[CompleteCallback] = None
 ) -> None:
     '''Show a transient GTK dialog to install packages asynchronously.'''
