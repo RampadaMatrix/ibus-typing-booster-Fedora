@@ -67,7 +67,7 @@ def init_libvoikko_error() -> str:
             if voikko:
                 return ''
             return 'Initialization of Voikko failed: object empty'
-        except libvoikko.VoikkoException as error:
+        except (libvoikko.VoikkoException, OSError) as error:
             return str(error)
     return 'import libvoikko failed.'
 
