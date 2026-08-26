@@ -41,6 +41,28 @@
   <url type="translate">https://translate.fedoraproject.org/projects/ibus-typing-booster/</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="2.31.0" date="2026-08-26" urgency="medium">
+      <url>https://github.com/mike-fabian/ibus-typing-booster/releases/tag/2.31.0</url>
+      <description>
+        <p>Bug fixes and enhancements</p>
+        <ul>
+          <li>
+            Require Python 3.9+
+          </li>
+          <li>
+            Modernize code for Python 3.9
+          </li>
+          <li>
+            Fix problem when typing `BackSpace` at the left side of the preedit (Resolves: github-issues:923)
+          </li>
+        </ul>
+      </description>
+      <issues>
+        <issue url="https://github.com/mike-fabian/ibus-typing-booster/issues/923">
+          github-issues#923
+        </issue>
+      </issues>
+    </release>
     <release version="2.30.11" date="2026-07-20" urgency="medium">
       <url>https://github.com/mike-fabian/ibus-typing-booster/releases/tag/2.30.11</url>
       <description>
