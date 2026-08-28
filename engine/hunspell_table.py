@@ -3284,6 +3284,12 @@ class TypingBoosterEngine(IBus.Engine):
         '''Update Preedit String in UI'''
         if self._debug_level > 1:
             LOGGER.debug('entering function')
+        if self._current_imes[0] == 'NoIME' and self._prefer_commit:
+            if self._current_preedit_text.text_str != '':
+                self.update_preedit_text_with_mode(
+                    IBus.Text.new_from_string(''), 0, False,
+                    IBus.PreeditFocusMode.COMMIT)
+            return
         if (self._show_raw_input >= 2  # Show *always*
             and self._typed_string
             and (self._lookup_table.hidden
@@ -4041,7 +4047,12 @@ class TypingBoosterEngine(IBus.Engine):
             self._m17n_trans_parts = m17n_translit.TransliterationParts()
             self._update_ui()
             return True
-        if self.is_empty():
+        if self._current_imes[0] == 'NoIME' and self._typed_string:
+            prefix_len = len(self._typed_string)
+            self.delete_surrounding_text(-prefix_len, prefix_len)
+            self._commit_string(selected_candidate + extra_text,
+                                input_phrase=selected_candidate)
+        elif self.is_empty():
             self._commit_string(selected_candidate + extra_text,
                                 input_phrase=selected_candidate)
         else:
@@ -4052,7 +4063,7 @@ class TypingBoosterEngine(IBus.Engine):
             self._trigger_surrounding_text_update()
             # Tiny delay to give the surrounding text a chance to
             # update:
-            GLib.timeout_add(5, self._update_ui_empty_input_try_completion)
+            GLib.timeout_add(10, self._update_ui_empty_input_try_completion)
         else:
             self._update_ui_empty_input()
         return True
@@ -10323,6 +10334,63 @@ class TypingBoosterEngine(IBus.Engine):
                                 'Do not pass release key event.')
                 return True
             return False
+
+        if (self.get_current_imes()[0] == 'NoIME'
+            and self._prefer_commit
+            and not self._typed_compose_sequence):
+            if key.val == IBus.KEY_space and not (key.control or key.mod1 or key.super or key.hyper or key.meta):
+                if self._lookup_table.get_number_of_candidates() and self._lookup_table.is_cursor_visible():
+                    return self._commit_candidate(self._lookup_table.get_cursor_pos(), extra_text=' ')
+                if self._typed_string:
+                    word = ''.join(self._typed_string)
+                    self.push_context(word)
+                super().commit_text(IBus.Text.new_from_string(' '))
+                self._clear_input()
+                self._trigger_surrounding_text_update()
+                GLib.timeout_add(10, self._update_ui_empty_input_try_completion)
+                return True
+
+            if key.val in (IBus.KEY_Return, IBus.KEY_KP_Enter, IBus.KEY_ISO_Enter) and not (key.control or key.mod1 or key.super or key.hyper or key.meta):
+                if self._lookup_table.get_number_of_candidates() and self._lookup_table.is_cursor_visible():
+                    return self._commit_candidate(self._lookup_table.get_cursor_pos(), extra_text='')
+                if self._typed_string:
+                    word = ''.join(self._typed_string)
+                    self.push_context(word)
+                self._clear_input()
+                self._update_ui_empty_input()
+                return False
+
+            if key.val in (IBus.KEY_BackSpace,) and not (key.control or key.mod1 or key.super or key.hyper or key.meta):
+                if self._typed_string:
+                    self._typed_string.pop()
+                    self._typed_string_cursor = len(self._typed_string)
+                    self._update_transliterated_strings()
+                    self.delete_surrounding_text(-1, 1)
+                    if self._typed_string:
+                        self._update_candidates()
+                        self._update_lookup_table_and_aux()
+                    else:
+                        self._update_ui_empty_input_try_completion()
+                    return True
+                return False
+
+            if key.val in (IBus.KEY_Escape,):
+                self._clear_input()
+                self._update_ui_empty_input()
+                return True
+
+            if (key.unicode
+                and unicodedata.category(key.unicode) not in ('Cc',)
+                and not (key.control or key.mod1 or key.super or key.hyper or key.meta)):
+                if self.is_empty():
+                    self.get_context()
+                self._typed_string.append(key.unicode)
+                self._typed_string_cursor = len(self._typed_string)
+                self._update_transliterated_strings()
+                super().commit_text(IBus.Text.new_from_string(key.unicode))
+                self._update_candidates()
+                self._update_lookup_table_and_aux()
+                return True
 
         if self.is_empty() and not self._lookup_table.is_cursor_visible():
             if self._debug_level > 1:
