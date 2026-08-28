@@ -18,5 +18,26 @@
 
 prefix=@prefix@
 export IBUS_LOCALEDIR=@localedir@
-exec @PYTHON@ @prefix@/share/ibus-typing-booster/setup/main.py $@
+SCRIPT_DIR=$(dirname "$0")
+
+if [ -n "${IBUS_TYPING_BOOSTER_LOCATION}" ] && [ -f "${IBUS_TYPING_BOOSTER_LOCATION}/setup/main.py" ]; then
+    SETUP_MAIN="${IBUS_TYPING_BOOSTER_LOCATION}/setup/main.py"
+elif [ -f "${SCRIPT_DIR}/main.py" ]; then
+    SETUP_MAIN="${SCRIPT_DIR}/main.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=$(cd "${SCRIPT_DIR}/.." && pwd)
+    fi
+elif [ -f "@prefix@/share/ibus-typing-booster/setup/main.py" ]; then
+    SETUP_MAIN="@prefix@/share/ibus-typing-booster/setup/main.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=@prefix@/share/ibus-typing-booster
+    fi
+else
+    SETUP_MAIN="@prefix@/share/ibus-typing-booster/setup/main.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=@prefix@/share/ibus-typing-booster
+    fi
+fi
+
+exec @PYTHON@ "${SETUP_MAIN}" "$@"
 

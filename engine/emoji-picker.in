@@ -20,5 +20,26 @@ PYTHON=@PYTHON@
 prefix=@prefix@
 datarootdir=@datarootdir@
 datadir=@datadir@
+SCRIPT_DIR=$(dirname "$0")
+
+if [ -n "${IBUS_TYPING_BOOSTER_LOCATION}" ] && [ -f "${IBUS_TYPING_BOOSTER_LOCATION}/engine/emoji_picker.py" ]; then
+    EMOJI_MAIN="${IBUS_TYPING_BOOSTER_LOCATION}/engine/emoji_picker.py"
+elif [ -f "${SCRIPT_DIR}/emoji_picker.py" ]; then
+    EMOJI_MAIN="${SCRIPT_DIR}/emoji_picker.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=$(cd "${SCRIPT_DIR}/.." && pwd)
+    fi
+elif [ -f "@datarootdir@/ibus-typing-booster/engine/emoji_picker.py" ]; then
+    EMOJI_MAIN="@datarootdir@/ibus-typing-booster/engine/emoji_picker.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=@datarootdir@/ibus-typing-booster
+    fi
+else
+    EMOJI_MAIN="@datarootdir@/ibus-typing-booster/engine/emoji_picker.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=@datarootdir@/ibus-typing-booster
+    fi
+fi
+
 export PYTHONIOENCODING=UTF-8
-exec ${PYTHON} @datarootdir@/ibus-typing-booster/engine/emoji_picker.py "$@"
+exec ${PYTHON} "${EMOJI_MAIN}" "$@"

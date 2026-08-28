@@ -125,9 +125,13 @@ class ItbTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls._tempdir = _TEMPDIR
+        if not os.path.exists(_TEMPDIR.name):
+            cls._tempdir = tempfile.TemporaryDirectory()
+        else:
+            cls._tempdir = _TEMPDIR
         cls._orig_m17ndir = _ORIG_M17NDIR
         cls._m17ndir = cls._tempdir.name
+        os.environ['M17NDIR'] = cls._m17ndir
         cls._m17n_config_file = os.path.join(cls._m17ndir, 'config.mic')
         # Copy test input methods into M17NDIR
         for mim_path in glob.glob(os.path.join(os.path.dirname(__file__), '*.mim')):
@@ -135,12 +139,18 @@ class ItbTestCase(unittest.TestCase):
         # Avoid failing test cases because of stuff in the users '~/.XCompose' file.
         cls._orig_xcomposefile = os.environ.pop('XCOMPOSEFILE', None)
         os.environ['XCOMPOSEFILE'] = os.path.join(cls._tempdir.name, 'XCompose')
-        shutil.copy('XCompose', cls._tempdir.name)
+        xcompose_path = os.path.join(os.path.dirname(__file__), 'XCompose')
+        if os.path.isfile(xcompose_path):
+            shutil.copy(xcompose_path, cls._tempdir.name)
+        else:
+            shutil.copy('XCompose', cls._tempdir.name)
         # List contents of Temporary directory used for m17n files and XCompose:
         m17n_dir_files = [os.path.join(cls._m17ndir, name)
                           for name in os.listdir(cls._m17ndir)]
         for path in m17n_dir_files:
             LOGGER.info('M17NDIR content: %r', path)
+        m17n_translit.fini()
+        m17n_translit.init()
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -152,7 +162,7 @@ class ItbTestCase(unittest.TestCase):
             os.environ['XCOMPOSEFILE'] = cls._orig_xcomposefile
         else:
             _value = os.environ.pop('XCOMPOSEFILE', None)
-        if cls._tempdir is not None:
+        if cls._tempdir is not None and cls._tempdir != _TEMPDIR:
             cls._tempdir.cleanup()
 
     @property

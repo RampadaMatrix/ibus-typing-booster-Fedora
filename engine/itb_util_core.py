@@ -5724,7 +5724,10 @@ def xdg_save_data_path(*resource: str) -> str:
     assert not resource_joined.startswith('/')
     path = os.path.join(xdg_data_home, resource_joined)
     if not os.path.isdir(path):
-        os.makedirs(path, exist_ok=True)
+        try:
+            os.makedirs(path, exist_ok=True)
+        except OSError:
+            pass
     return path
 
 def is_desktop(name: str) -> bool:
@@ -5752,6 +5755,7 @@ def get_gnome_shell_version() -> tuple[int, ...]:
     Examples:
       '48.3' → (48, 3)
       '49.alpha.1' → (49, -3, 1)
+      '50' → (50,)
 
     :return: A tuple or empty tuple () on failure.
     '''
@@ -5765,7 +5769,7 @@ def get_gnome_shell_version() -> tuple[int, ...]:
         'alpha': -3,
         'beta': -2,
         'rc': -1}
-    match = re.search(r'(\d+(?:\.(?:\d+|alpha|beta|rc))+)',
+    match = re.search(r'(\d+(?:\.(?:\d+|alpha|beta|rc))*)',
                       output, re.IGNORECASE)
     if not match:
         return ()

@@ -67,9 +67,13 @@ class M17nTranslitTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         locale.setlocale(locale.LC_MESSAGES, 'en_US.UTF-8')
-        cls._tempdir = _TEMPDIR
+        if not os.path.exists(_TEMPDIR.name):
+            cls._tempdir = tempfile.TemporaryDirectory()
+        else:
+            cls._tempdir = _TEMPDIR
         cls._orig_m17ndir = _ORIG_M17NDIR
         cls._m17ndir = cls._tempdir.name
+        os.environ['M17NDIR'] = cls._m17ndir
         cls._m17n_config_file = os.path.join(cls._m17ndir, 'config.mic')
         # Copy test input methods into M17NDIR
         for mim_path in glob.glob(os.path.join(os.path.dirname(__file__), '*.mim')):
@@ -78,6 +82,8 @@ class M17nTranslitTestCase(unittest.TestCase):
                           for name in os.listdir(cls._m17ndir)]
         for path in m17n_dir_files:
             LOGGER.info('M17NDIR content: %r', path)
+        m17n_translit.fini()
+        m17n_translit.init()
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -85,7 +91,7 @@ class M17nTranslitTestCase(unittest.TestCase):
             os.environ['M17NDIR'] = cls._orig_m17ndir
         else:
             _value = os.environ.pop('M17NDIR', None)
-        if cls._tempdir is not None:
+        if cls._tempdir is not None and cls._tempdir != _TEMPDIR:
             cls._tempdir.cleanup()
 
     @property
@@ -2065,6 +2071,8 @@ class M17nTranslitTestCase(unittest.TestCase):
         self.assertEqual(trans.transliterate(['a']), 'ঋ')  # U+098B BENGALI LETTER VOCALIC R
         # reinitialize m17n_translit:
         m17n_translit.fini()
+        if self._m17ndir:
+            os.environ['M17NDIR'] = self._m17ndir
         m17n_translit.init()
         # using the old trans for example like
         # trans.transliterate(['a']) would segfault now, we need to

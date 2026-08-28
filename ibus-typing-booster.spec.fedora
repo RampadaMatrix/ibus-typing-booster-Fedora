@@ -1,5 +1,5 @@
 Name:       ibus-typing-booster
-Version:    2.27.79
+Version:    2.31.0
 Release:    %autorelease
 Summary:    A completion input method
 License:    GPL-3.0-or-later AND Apache-2.0
@@ -12,6 +12,7 @@ Requires:   python3-dbus
 Requires:   python3-distro
 Requires:   python3-enchant
 Requires:   python3-pyxdg
+Requires:   python3-gobject-base
 %if 0%{?fedora}
 # To make emoji and Unicode symbol matching faster:
 Requires:     python3-rapidfuzz
@@ -34,6 +35,7 @@ Recommends: python3-pyatspi
 # To get the primary selection on Wayland when getting it using
 # surrounding text fails:
 Recommends: wl-clipboard
+Recommends: gtk4
 # For ollama support
 Recommends: python3-httpx
 %endif
@@ -135,8 +137,8 @@ export PYTHON=%{__python3}
 %install 
 export PYTHON=%{__python3}
 %make_install NO_INDEX=true  pkgconfigdir=%{_datadir}/pkgconfig
-%py_byte_compile %{python3} /usr/share/ibus-typing-booster/engine
-%py_byte_compile %{python3} /usr/share/ibus-typing-booster/setup
+%py_byte_compile %{python3} %{buildroot}%{_datadir}/%{name}/engine
+%py_byte_compile %{python3} %{buildroot}%{_datadir}/%{name}/setup
 %if 0%{?fedora} >= 26 || 0%{?rhel} > 7
     # These files are in the required package “cldr-emoji-annotation”
     rm $RPM_BUILD_ROOT/%{_datadir}/%{name}/data/annotations/*.xml
@@ -161,6 +163,10 @@ export PYTHON=%{__python3}
 
 %check
 export LC_ALL=C.UTF-8
+export XDG_DATA_HOME=/tmp/itb_test_data
+export XDG_CONFIG_HOME=/tmp/itb_test_config
+export XDG_CACHE_HOME=/tmp/itb_test_cache
+export XDG_RUNTIME_DIR=/tmp/itb_test_runtime
 appstreamcli validate --pedantic --no-net %{buildroot}/%{_datadir}/metainfo/*.metainfo.xml
 # According to the appstream developers, appstream-util is unmaintained:
 # https://github.com/ximion/appstream/issues/494#issuecomment-1521419742
@@ -181,7 +187,8 @@ pushd engine
         echo "/usr/share/m17n/si-wijesekara.mim does not exist, m17n-db probably < 1.8.6, skipping doctest of m17n_translit.py"
     fi
     python3 itb_emoji.py -v
-    python3 itb_util.py -v
+    python3 itb_util_core.py -v
+    python3 itb_util_gui.py -v
 popd
 mkdir -p /tmp/glib-2.0/schemas/
 cp org.freedesktop.ibus.engine.typing-booster.gschema.xml \

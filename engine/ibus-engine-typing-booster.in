@@ -21,7 +21,27 @@ PYTHON=@PYTHON@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libexecdir=@libexecdir@
-export IBUS_TYPING_BOOSTER_LOCATION=${prefix}/share/ibus-typing-booster
+SCRIPT_DIR=$(dirname "$0")
+
+if [ -n "${IBUS_TYPING_BOOSTER_LOCATION}" ] && [ -f "${IBUS_TYPING_BOOSTER_LOCATION}/engine/main.py" ]; then
+    ENGINE_MAIN="${IBUS_TYPING_BOOSTER_LOCATION}/engine/main.py"
+elif [ -f "${SCRIPT_DIR}/main.py" ]; then
+    ENGINE_MAIN="${SCRIPT_DIR}/main.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=$(cd "${SCRIPT_DIR}/.." && pwd)
+    fi
+elif [ -f "${prefix}/share/ibus-typing-booster/engine/main.py" ]; then
+    ENGINE_MAIN="${prefix}/share/ibus-typing-booster/engine/main.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=${prefix}/share/ibus-typing-booster
+    fi
+else
+    ENGINE_MAIN="${prefix}/share/ibus-typing-booster/engine/main.py"
+    if [ -z "${IBUS_TYPING_BOOSTER_LOCATION}" ]; then
+        export IBUS_TYPING_BOOSTER_LOCATION=${prefix}/share/ibus-typing-booster
+    fi
+fi
+
 export IBUS_TYPING_BOOSTER_LIB_LOCATION=${libexecdir}
 export PYTHONIOENCODING=UTF-8
 
@@ -33,20 +53,22 @@ export PYTHONIOENCODING=UTF-8
 # will appear in the debug log when "ibus restart" is executed):
 # export IBUS_TYPING_BOOSTER_PROFILE=yes
 
-for arg in $@; do
+for arg in "$@"; do
 	case $arg in
 	--xml | -x)
-		exec ${PYTHON} ${prefix}/share/ibus-typing-booster/engine/main.py --xml;;
+		exec ${PYTHON} "${ENGINE_MAIN}" --xml;;
 	--help | -h)
-		exec ${PYTHON} ${prefix}/share/ibus-typing-booster/engine/main.py $@;;
+		exec ${PYTHON} "${ENGINE_MAIN}" "$@";;
         *)
 		if [ "x${IBUS_TYPING_BOOSTER_PROFILE}" != "x" ]; then
-                        exec ${PYTHON} ${prefix}/share/ibus-typing-booster/engine/main.py --profile $@
+                        exec ${PYTHON} "${ENGINE_MAIN}" --profile "$@"
                 else
-                        exec ${PYTHON} ${prefix}/share/ibus-typing-booster/engine/main.py $@
+                        exec ${PYTHON} "${ENGINE_MAIN}" "$@"
                 fi
                 exit 0
                 ;;
 	esac
 done
+
+exec ${PYTHON} "${ENGINE_MAIN}" "$@"
 

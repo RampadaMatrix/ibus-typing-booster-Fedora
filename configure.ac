@@ -65,16 +65,12 @@ AC_ARG_ENABLE([installed-tests],
 AM_CONDITIONAL([ENABLE_INSTALLED_TESTS], [test x"$enable_installed_tests" = x"yes"])
 
 
-# OUTPUT files
 AC_CONFIG_FILES([po/Makefile.in
     Makefile
     engine/Makefile
     engine/typing-booster.xml.in
-    engine/ibus-engine-typing-booster
-    engine/emoji-picker
     engine/itb_version.py
     setup/Makefile
-    setup/ibus-setup-typing-booster
     setup/itb_version.py
     tests/Makefile
     data/Makefile
@@ -82,6 +78,9 @@ AC_CONFIG_FILES([po/Makefile.in
     data/annotationsDerived/Makefile
     icons/Makefile]
 )
+AC_CONFIG_FILES([engine/ibus-engine-typing-booster], [chmod a+x engine/ibus-engine-typing-booster])
+AC_CONFIG_FILES([engine/emoji-picker], [chmod a+x engine/emoji-picker])
+AC_CONFIG_FILES([setup/ibus-setup-typing-booster], [chmod a+x setup/ibus-setup-typing-booster])
 
 AC_OUTPUT
 

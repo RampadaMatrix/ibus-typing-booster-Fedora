@@ -58,7 +58,11 @@ class ComposeSequencesTestCase(unittest.TestCase):
         cls._tempdir = tempfile.TemporaryDirectory() # pylint: disable=consider-using-with
         cls._orig_xcomposefile = os.environ.pop('XCOMPOSEFILE', None)
         os.environ['XCOMPOSEFILE'] = os.path.join(cls._tempdir.name, 'XCompose')
-        shutil.copy('XCompose', cls._tempdir.name)
+        xcompose_path = os.path.join(os.path.dirname(__file__), 'XCompose')
+        if os.path.isfile(xcompose_path):
+            shutil.copy(xcompose_path, cls._tempdir.name)
+        else:
+            shutil.copy('XCompose', cls._tempdir.name)
         tempdir_files = [os.path.join(cls._tempdir.name, basename)
                          for basename in os.listdir(cls._tempdir.name)]
         for path in tempdir_files:

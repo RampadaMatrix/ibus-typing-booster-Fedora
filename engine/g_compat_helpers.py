@@ -76,7 +76,9 @@ def N_(text: str) -> str: # pylint: disable=invalid-name
 def is_wayland() -> bool:
     '''Test whether Wayland is used'''
     display = Gdk.Display.get_default() # pylint: disable=no-value-for-parameter
-    return display is not None and "wayland" in display.get_name().lower()
+    return (display is not None
+            and bool(display.get_name())
+            and "wayland" in display.get_name().lower())
 
 def add_child(widget: Gtk.Widget, child: Gtk.Widget) -> None:
     '''Gtk3/4 compatible child insertion.'''

@@ -41,7 +41,11 @@ check_SCRIPTS = run_tests
 LOG_COMPILER = $(builddir)/run_tests
 
 TESTS_ENVIRONMENT = \
-	IBUS_TYPING_BOOSTER_LOCATION=../
+	IBUS_TYPING_BOOSTER_LOCATION=../ \
+	XDG_DATA_HOME=$(abs_builddir)/xdg_data \
+	XDG_CONFIG_HOME=$(abs_builddir)/xdg_config \
+	XDG_CACHE_HOME=$(abs_builddir)/xdg_cache \
+	XDG_RUNTIME_DIR=$(abs_builddir)/xdg_runtime
 
 test_meta_in = meta.test.in
 test_metas =

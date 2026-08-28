@@ -22,6 +22,9 @@ from typing import Any
 from typing import Type
 import sys
 import os
+import shutil
+import subprocess
+import tempfile
 import unittest
 
 # pip3 install tap.py --user
@@ -31,11 +34,50 @@ try:
 except ImportError:
     TAPTestRunner = None
 
+start_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Ensure isolated writable XDG environment for testing
+_temp_xdg_dir = None
+if ('XDG_DATA_HOME' not in os.environ
+        or not os.path.isdir(os.environ['XDG_DATA_HOME'])
+        or not os.access(os.environ['XDG_DATA_HOME'], os.W_OK)):
+    try:
+        _temp_xdg_dir = tempfile.TemporaryDirectory(prefix='itb_xdg_')
+        os.environ['XDG_DATA_HOME'] = os.path.join(_temp_xdg_dir.name, 'data')
+        os.environ['XDG_CONFIG_HOME'] = os.path.join(_temp_xdg_dir.name, 'config')
+        os.environ['XDG_CACHE_HOME'] = os.path.join(_temp_xdg_dir.name, 'cache')
+        os.environ['XDG_RUNTIME_DIR'] = os.path.join(_temp_xdg_dir.name, 'runtime')
+        os.makedirs(os.environ['XDG_DATA_HOME'], exist_ok=True)
+        os.makedirs(os.environ['XDG_CONFIG_HOME'], exist_ok=True)
+        os.makedirs(os.environ['XDG_CACHE_HOME'], exist_ok=True)
+        os.makedirs(os.environ['XDG_RUNTIME_DIR'], exist_ok=True)
+    except OSError:
+        pass
+
+# Ensure GSettings schema is available during tests
+if 'GSETTINGS_SCHEMA_DIR' not in os.environ:
+    top_dir = os.path.abspath(os.path.join(start_dir, '..'))
+    schema_xml = os.path.join(top_dir, 'org.freedesktop.ibus.engine.typing-booster.gschema.xml')
+    if os.path.isfile(schema_xml):
+        schema_dir = os.path.join(
+            _temp_xdg_dir.name if _temp_xdg_dir else tempfile.gettempdir(),
+            'glib-2.0', 'schemas')
+        try:
+            os.makedirs(schema_dir, exist_ok=True)
+            shutil.copy(schema_xml, schema_dir)
+            subprocess.run(['glib-compile-schemas', schema_dir], check=False, capture_output=True)
+            os.environ['GSETTINGS_SCHEMA_DIR'] = schema_dir
+        except Exception:
+            pass
+
 if 'IBUS_TYPING_BOOSTER_LOCATION' in os.environ:
     location_path = os.environ['IBUS_TYPING_BOOSTER_LOCATION']
-    if location_path != None and location_path != '':
+    if location_path is not None and location_path != '':
         engine_path = os.path.join(location_path, 'engine')
         sys.path.append(engine_path)
+else:
+    os.environ['IBUS_TYPING_BOOSTER_LOCATION'] = os.path.abspath(os.path.join(start_dir, '..'))
+    sys.path.append(os.path.join(os.environ['IBUS_TYPING_BOOSTER_LOCATION'], 'engine'))
 sys.path.append('@PKGDATADIR@/engine')
 
 # -- Load and run our unit tests ---------------------------------------------

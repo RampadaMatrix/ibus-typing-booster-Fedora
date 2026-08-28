@@ -363,6 +363,15 @@ def write_xml() -> None:
     recent_gnome = (itb_util_core.is_desktop('gnome')
                     and itb_util_core.get_gnome_shell_version() >= (48, 3))
 
+    schema_source: Optional[Gio.SettingsSchemaSource] = (
+        Gio.SettingsSchemaSource.get_default())
+    schema: Optional[Gio.SettingsSchema] = (
+        schema_source.lookup(
+            'org.freedesktop.ibus.engine.typing-booster', True)
+        if schema_source is not None
+        else None
+    )
+
     for ime in supported_input_methods:
         _engine = SubElement( # pylint: disable=possibly-used-before-assignment
             egs, 'engine')
@@ -420,11 +429,16 @@ def write_xml() -> None:
             icon =  m17n_db_info.get_icon(ime)
             description = m17n_db_info.get_description(ime)
         setup = SETUP_TOOL + f' --engine-name {name}'
-        gsettings = Gio.Settings(
-            schema='org.freedesktop.ibus.engine.typing-booster',
-            path=schema_path)
-        user_symbol = itb_util_core.variant_to_value(
-            gsettings.get_user_value('inputmodetruesymbol'))
+        user_symbol = None
+        if schema is not None:
+            try:
+                gsettings = Gio.Settings(
+                    schema='org.freedesktop.ibus.engine.typing-booster',
+                    path=schema_path)
+                user_symbol = itb_util_core.variant_to_value(
+                    gsettings.get_user_value('inputmodetruesymbol'))
+            except Exception:
+                user_symbol = None
         if user_symbol is not None:
             symbol = user_symbol
 

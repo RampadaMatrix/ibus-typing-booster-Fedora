@@ -45,12 +45,21 @@ from itb_gtk import Gdk, Gtk
 class ClipboardApp(Gtk.Application): # type: ignore[misc]
     '''Class used to read the clipboard'''
     def __init__(self) -> None:
-        super().__init__(application_id="org.freedesktop.ibus.engine.typing_booster.GetSelection")
+        super().__init__(
+            application_id="org.freedesktop.ibus.engine.typing_booster.GetSelection",
+            flags=Gio.ApplicationFlags.NON_UNIQUE)
         self.window: Optional[Gtk.ApplicationWindow] = None
-        self.display: Gdk.Display = Gdk.Display.get_default() # pylint: disable=no-value-for-parameter
+        self.display: Optional[Gdk.Display] = None
 
     def do_activate(self) -> None: # pylint: disable=arguments-differ
-        if 'wayland' in self.display.get_name().lower():
+        # Safety fallback timeout to ensure the process quits
+        GLib.timeout_add(800, self.quit)
+        self.display = Gdk.Display.get_default()
+        if not self.display:
+            self.quit()
+            return
+        display_name = self.display.get_name()
+        if display_name and 'wayland' in display_name.lower():
             # A window is needed so that zwp_primary_selection_v1
             # (mouse selection) works on Wayland. When there is no
             # visible window, GTK might delay registration of the
@@ -67,7 +76,18 @@ class ClipboardApp(Gtk.Application): # type: ignore[misc]
 
     def try_read_clipboard(self) -> bool:
         '''Method to read the clipboard and print the result'''
-        clipboard: Gdk.Clipboard = self.display.get_primary_clipboard() # pylint: disable=c-extension-no-member
+        if not self.display:
+            self.display = Gdk.Display.get_default()
+        if not self.display:
+            self.quit()
+            return False
+        try:
+            clipboard: Optional[Gdk.Clipboard] = self.display.get_primary_clipboard() # pylint: disable=c-extension-no-member
+        except Exception:
+            clipboard = None
+        if not clipboard:
+            self.quit()
+            return False
 
         def on_text_received(
                 clipboard: 'Gdk.Clipboard', result: Gio.AsyncResult) -> None:
@@ -75,14 +95,17 @@ class ClipboardApp(Gtk.Application): # type: ignore[misc]
                 text: Optional[str] = clipboard.read_text_finish(result)
                 if text is not None:
                     print(text)
-            except GLib.Error as error:
+            except Exception as error:
                 print(f'Error reading primary selection: {error}',
                       file=sys.stderr)
-            app.quit() # pylint: disable=possibly-used-before-assignment
+            self.quit()
 
-        clipboard.read_text_async(None, on_text_received)
+        try:
+            clipboard.read_text_async(None, on_text_received)
+        except Exception:
+            self.quit()
         return False # Do not repeat timeout
 
 if __name__ == "__main__":
     app = ClipboardApp()
-    app.run()
+    app.run(sys.argv)
