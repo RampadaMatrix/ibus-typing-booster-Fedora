@@ -335,9 +335,8 @@ class TypingBoosterLookupTable:
         # ibus-typing-booster, it should be set to False.
         self._ibus_lookup_table.set_round(False)
         for index in range(9):
-            label = str(index + 1)
             self._ibus_lookup_table.set_label(
-                index, IBus.Text.new_from_string(label))
+                index, IBus.Text.new_from_string(''))
         self._state: LookupTableState = LookupTableState.NORMAL
         self._hidden: bool = False
         self._related_candidates_phrase: str = ''
@@ -1954,11 +1953,12 @@ class TypingBoosterEngine(IBus.Engine):
                         if prefix_length:
                             prefix = (
                                 self._transliterated_strings[ime][0:prefix_length])
+                        self.get_context()
                         try:
                             candidates = self.database.select_words(
                                 stripped_transliterated_string,
-                                p_phrase=self._p_phrase,
-                                pp_phrase=self._pp_phrase)
+                                p_phrase=self.get_p_phrase(),
+                                pp_phrase=self.get_pp_phrase())
                         except Exception: # pylint: disable=broad-except
                             LOGGER.exception('Exception when calling select_words')
                     if candidates and prefix:
@@ -4780,9 +4780,17 @@ class TypingBoosterEngine(IBus.Engine):
             if self._debug_level > 1:
                 LOGGER.debug('Surrounding text is empty, cannot get context.')
             return
-        tokens = ([
+        text_before_cursor = text[:cursor_pos]
+        if not self.is_empty():
+            preedit_str = self._get_preedit_string_with_case_mode_applied()
+            if preedit_str and text_before_cursor.endswith(preedit_str):
+                text_before_cursor = text_before_cursor[:-len(preedit_str)]
+
+        raw_tokens = [
             itb_util_core.strip_token(token)
-            for token in itb_util_core.tokenize(text[:cursor_pos])])[-3:]
+            for token in itb_util_core.tokenize(text_before_cursor)
+        ]
+        tokens = [t for t in raw_tokens if t][-3:]
         if self._debug_level > 1:
             LOGGER.debug(
                 'Found from surrounding text: tokens=%s', repr(tokens))
@@ -11531,6 +11539,8 @@ class TypingBoosterEngine(IBus.Engine):
         self._surrounding_text.cursor_pos = cursor_pos
         self._surrounding_text.anchor_pos = anchor_pos
         self._surrounding_text.event.set()
+        if self.is_empty():
+            self.get_context()
 
     def _on_gsettings_value_changed(
             self, _settings: Gio.Settings, key: str) -> None:
