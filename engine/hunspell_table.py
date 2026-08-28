@@ -342,25 +342,18 @@ class TypingBoosterLookupTable:
         self._related_candidates_phrase: str = ''
         self._enabled_by_tab: bool = False
         self._enabled_by_min_char_complete: bool = False
+        self._set_blank_labels()
 
-    # I could use something like:
-    #
-    # def __getattr__(self, name: str) -> Any:
-    #     '''Delegate unknown attributes to the internal IBus.LookupTable.'''
-    #     return getattr(self._ibus_lookup_table, name)
-    #
-    # to automatically make all IBus.LookupTable attributes accessible.
-    # But although this looks elegant and reduces boilerplate code,
-    # mypy cannot help me anymore to find mistyped attributes.
-    # mypy would then assume that all attributes exist:
-    # “Any unknown attribute access could return anything.”
-    #
-    # Better explicitly define all the IBus delegate methods which
-    # are really used:
+    def _set_blank_labels(self) -> None:
+        '''Set zero-width invisible labels to prevent GNOME Shell from drawing numeric indices.'''
+        for index in range(9):
+            self._ibus_lookup_table.set_label(
+                index, IBus.Text.new_from_string('\u200B'))
 
     def clear(self) -> None:
         '''Delegate to IBus.LookupTable'''
         self._ibus_lookup_table.clear()
+        self._set_blank_labels()
 
     def get_number_of_candidates(self) -> int:
         '''Delegate to IBus.LookupTable'''
@@ -433,6 +426,10 @@ class TypingBoosterLookupTable:
     def append_candidate(self, text: IBus.Text) -> None:
         '''Delegate to IBus.LookupTable'''
         self._ibus_lookup_table.append_candidate(text)
+        index = self._ibus_lookup_table.get_number_of_candidates() - 1
+        if 0 <= index < 9:
+            self._ibus_lookup_table.set_label(
+                index, IBus.Text.new_from_string('\u200B'))
 
     @property
     def state(self) -> LookupTableState:
