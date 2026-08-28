@@ -3434,7 +3434,7 @@ class TypingBoosterEngine(IBus.Engine):
         # is zero!
         if ((self.is_empty()
              and not self.has_osk
-             and self._min_char_complete != 0
+             and self._lookup_table.get_number_of_candidates() == 0
              and self._lookup_table.state not in (
                  LookupTableState.RELATED_CANDIDATES,
                  LookupTableState.SELECTION_INFO)
@@ -3464,9 +3464,9 @@ class TypingBoosterEngine(IBus.Engine):
         # and inline completion is on.
         typed_string = itb_util_core.normalize_nfc_and_composition_exclusions(
             self._transliterated_strings[
-                self.get_current_imes()[0]])
+                self.get_current_imes()[0]]) if self._transliterated_strings else ''
         first_candidate = itb_util_core.normalize_nfc_and_composition_exclusions(
-            self._candidates[0].phrase)
+            self._candidates[0].phrase) if self._candidates else ''
         if (not first_candidate.startswith(typed_string)
             or first_candidate == typed_string):
             # The first candidate is not a direct completion of the
@@ -3545,7 +3545,7 @@ class TypingBoosterEngine(IBus.Engine):
                     first_candidate = self._candidates[0].phrase
                     user_freq = self._candidates[0].user_freq
                 typed_string = itb_util_core.normalize_nfc_and_composition_exclusions(
-                    self._transliterated_strings[self.get_current_imes()[0]])
+                    self._transliterated_strings[self.get_current_imes()[0]]) if self._transliterated_strings else ''
                 spellcheck_single_dictionary = (
                     self.database.hunspell_obj.spellcheck_single_dictionary(
                         (self._p_phrase, self._pp_phrase, first_candidate)))
@@ -3606,39 +3606,32 @@ class TypingBoosterEngine(IBus.Engine):
             IBus.Text.new_from_string(''), False)
 
     def _update_ui_empty_input_try_completion(self) -> None:
-        '''Update the UI when the input is empty and try a completion.'''
+        '''Update the UI when the input is empty and try next-word prediction.'''
         if self._debug_level > 1:
             LOGGER.debug('entering function')
         if not self.is_empty():
             self._update_preedit()
             return
         self.get_context()
-        if (not self._unit_test
-            and
-            (not self._surrounding_text.event.is_set()
-             or not self._is_context_from_surrounding_text)):
+        p_phrase = self.get_p_phrase()
+        if not p_phrase:
             if self._debug_level > 1:
                 LOGGER.debug(
-                    'Failed to get context from surrounding text. '
+                    'No previous phrase context available. '
                     'Do not try to complete on empty input.')
             self._update_ui_empty_input()
             return
-        if ((self._min_char_complete != 0 and not self.has_osk)
-            or self._hide_input
+        if (self._hide_input
             or not self._word_predictions
             or (self._tab_enable
                 and not self.has_osk
                 and not self._lookup_table.enabled_by_tab)):
-            # If the lookup table would be hidden anyway, there is no
-            # point in updating the candidates, save some time by making
-            # sure the lookup table and the auxiliary text are really
-            # empty and hidden and return immediately:
             self._update_ui_empty_input()
             return
         self._lookup_table.enabled_by_tab = False
         self._lookup_table.state = LookupTableState.NORMAL
         phrase_candidates = self.database.select_words(
-            '', p_phrase=self.get_p_phrase(), pp_phrase=self.get_pp_phrase())
+            '', p_phrase=p_phrase, pp_phrase=self.get_pp_phrase())
         if self._debug_level > 2:
             LOGGER.debug('phrase_candidates=%s', phrase_candidates)
         if not phrase_candidates:

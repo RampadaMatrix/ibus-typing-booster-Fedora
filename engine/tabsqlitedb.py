@@ -531,58 +531,123 @@ class TabSqliteDb:
             self,
             p_phrase: str,
             pp_phrase: str) -> list[itb_util_core.PredictionCandidate]:
-        '''Get phrases from database which occured previously with
-        any input after the given context
+        '''Get phrases from database which occurred previously with
+        any input after the given context (next-word prediction).
 
         Returns a list of matches where each match is a tuple in the
         form of (phrase, user_freq), i.e. returns something like
         [(phrase, user_freq), ...]
-
         '''
         if DEBUG_LEVEL > 1:
             LOGGER.debug(
                 'p_phrase=%s pp_phrase=%s', p_phrase, pp_phrase)
         phrase_frequencies: dict[str, float] = {}
-        if not p_phrase or not pp_phrase:
+        if not p_phrase:
             return itb_util_core.best_candidates(phrase_frequencies)
-        p_phrase = itb_util_core.remove_accents(p_phrase.lower())
-        pp_phrase = itb_util_core.remove_accents(pp_phrase.lower())
-        sqlargs = {'p_phrase': p_phrase, 'pp_phrase': pp_phrase}
-        sqlstr = ('SELECT phrase, sum(user_freq) FROM user_db.phrases '
-                  'WHERE p_phrase = :p_phrase '
-                  'AND pp_phrase = :pp_phrase GROUP BY phrase;')
-        results = None
+        p_phrase = itb_util_core.remove_accents(p_phrase.lower().strip())
+        pp_phrase = itb_util_core.remove_accents(pp_phrase.lower().strip()) if pp_phrase else ''
+
+        # 1. Trigram search (if pp_phrase is present)
+        if pp_phrase:
+            sqlargs_tri = {'p_phrase': p_phrase, 'pp_phrase': pp_phrase}
+            sqlstr_tri = ('SELECT phrase, sum(user_freq) FROM user_db.phrases '
+                          'WHERE p_phrase = :p_phrase '
+                          'AND pp_phrase = :pp_phrase GROUP BY phrase;')
+            try:
+                results_tri = self.database.execute(sqlstr_tri, sqlargs_tri).fetchall()
+                if results_tri:
+                    count_tri_sql = (
+                        'SELECT sum(user_freq) FROM user_db.phrases '
+                        'WHERE p_phrase = :p_phrase AND pp_phrase = :pp_phrase;')
+                    count_tri_res = self.database.execute(count_tri_sql, sqlargs_tri).fetchall()
+                    count_tri = count_tri_res[0][0] if (count_tri_res and count_tri_res[0][0]) else 1
+                    for r in results_tri:
+                        word = r[0].strip()
+                        first_word = word.split()[0] if word else ''
+                        if first_word and first_word.lower() != p_phrase:
+                            phrase_frequencies[first_word] = 0.7 * (r[1] / float(count_tri))
+            except Exception: # pylint: disable=broad-except
+                LOGGER.exception(
+                    'Unexpected error getting trigram phrases for empty input')
+
+        # 2. Bigram search (using p_phrase)
+        sqlargs_bi = {'p_phrase': p_phrase}
+        sqlstr_bi = ('SELECT phrase, sum(user_freq) FROM user_db.phrases '
+                      'WHERE p_phrase = :p_phrase GROUP BY phrase;')
         try:
-            results = self.database.execute(sqlstr, sqlargs).fetchall()
+            results_bi = self.database.execute(sqlstr_bi, sqlargs_bi).fetchall()
+            if results_bi:
+                count_bi_sql = (
+                    'SELECT sum(user_freq) FROM user_db.phrases '
+                    'WHERE p_phrase = :p_phrase;')
+                count_bi_res = self.database.execute(count_bi_sql, sqlargs_bi).fetchall()
+                count_bi = count_bi_res[0][0] if (count_bi_res and count_bi_res[0][0]) else 1
+                for r in results_bi:
+                    word = r[0].strip()
+                    first_word = word.split()[0] if word else ''
+                    if first_word and first_word.lower() != p_phrase:
+                        bi_score = 0.5 * (r[1] / float(count_bi))
+                        if first_word in phrase_frequencies:
+                            phrase_frequencies[first_word] += bi_score
+                        else:
+                            phrase_frequencies[first_word] = bi_score
         except Exception: # pylint: disable=broad-except
             LOGGER.exception(
-                'Unexpected error getting phrases for empty input '
-                'with given context from user_db')
-            results = None
-        if not results:
-            return itb_util_core.best_candidates(phrase_frequencies)
-        sqlstr = (
-            'SELECT sum(user_freq) FROM user_db.phrases '
-            'WHERE p_phrase = :p_phrase AND pp_phrase = :pp_phrase;')
-        count_pp_phrase_p_phrase = 0
-        try:
-            count_pp_phrase_p_phrase = self.database.execute(
-                sqlstr, sqlargs).fetchall()[0][0]
-        except Exception: # pylint: disable=broad-except
-            LOGGER.exception(
-                'Unexpected error getting total count for empty input '
-                'with given context from user_db')
-            count_pp_phrase_p_phrase = 0
-        if not count_pp_phrase_p_phrase:
-            return itb_util_core.best_candidates(phrase_frequencies)
-        for result in results:
-            phrase_frequencies.update(
-                [(result[0], result[1]/float(count_pp_phrase_p_phrase))])
+                'Unexpected error getting bigram phrases for empty input')
+
+        # 3. Contextual common transitions seed if local learning is low
+        common_transitions: dict[str, list[str]] = {
+            'i': ['am', 'have', 'will', 'can', 'would', 'think', 'need', 'was', 'do', 'want'],
+            'you': ['can', 'are', 'have', 'will', 'should', 'need', 'know', 'want', 'may'],
+            'we': ['can', 'are', 'have', 'will', 'need', 'should', 'must', 'could'],
+            'they': ['are', 'were', 'have', 'will', 'can', 'should', 'do'],
+            'he': ['is', 'was', 'has', 'will', 'can', 'said'],
+            'she': ['is', 'was', 'has', 'will', 'can', 'said'],
+            'it': ['is', 'was', 'will', 'has', 'can', 'should', 'would', 'seems'],
+            'this': ['is', 'will', 'can', 'has', 'was', 'means', 'feature'],
+            'that': ['is', 'was', 'the', 'you', 'we', 'will', 'can'],
+            'my': ['system', 'computer', 'name', 'account', 'work', 'code', 'file'],
+            'the': ['system', 'file', 'first', 'user', 'best', 'new', 'code', 'same', 'default'],
+            'in': ['the', 'my', 'this', 'a', 'our', 'order', 'addition'],
+            'on': ['the', 'my', 'this', 'linux', 'fedora', 'wayland', 'board'],
+            'for': ['the', 'example', 'this', 'you', 'more', 'all', 'each'],
+            'with': ['the', 'this', 'you', 'respect', 'all'],
+            'to': ['the', 'be', 'make', 'use', 'do', 'get', 'see', 'have', 'create'],
+            'is': ['a', 'the', 'not', 'an', 'used', 'working', 'available', 'very'],
+            'are': ['the', 'not', 'available', 'used', 'all', 'expected'],
+            'will': ['be', 'not', 'have', 'help', 'work', 'make'],
+            'can': ['be', 'use', 'make', 'help', 'see', 'also'],
+            'system': ['is', 'architecture', 'path', 'settings', 'administrator', 'files', 'update'],
+            'linux': ['system', 'kernel', 'distribution', 'environment', 'desktop'],
+            'not': ['be', 'only', 'have', 'work', 'available', 'all', 'yet'],
+            'have': ['a', 'been', 'to', 'the', 'no', 'any', 'seen'],
+            'has': ['been', 'a', 'the', 'no', 'not'],
+        }
+        if len(phrase_frequencies) < 3 and p_phrase in common_transitions:
+            base_score = 0.05
+            for idx, word in enumerate(common_transitions[p_phrase]):
+                if word not in phrase_frequencies and word.lower() != p_phrase:
+                    phrase_frequencies[word] = base_score / (idx + 1)
+
         if DEBUG_LEVEL > 1:
             LOGGER.debug(
                 'Best candidates for empty input with given context=%s',
                 itb_util_core.best_candidates(phrase_frequencies))
         return itb_util_core.best_candidates(phrase_frequencies)
+
+    def _rank_and_finalize_candidates(
+            self,
+            phrase_frequencies: dict[str, float],
+            input_phrase: str,
+            title_case: bool) -> list[itb_util_core.PredictionCandidate]:
+        '''Finalize candidates with single-word priority and exact match ranking.'''
+        if ' ' not in input_phrase:
+            for phrase_key in list(phrase_frequencies.keys()):
+                if ' ' in phrase_key.strip():
+                    phrase_frequencies[phrase_key] *= 0.1
+                elif phrase_key.lower() == input_phrase.lower():
+                    phrase_frequencies[phrase_key] = max(phrase_frequencies[phrase_key], 1.0) + 10.0
+        return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
 
     def select_words(
             self,
@@ -662,24 +727,7 @@ class TabSqliteDb:
             'GROUP BY phrase;')
         try:
             # Get “unigram” data from user_db.
-            #
-            # Example: Let’s assume the user typed “co” and user_db contains
-            #
-            #     1|colou|colour|green|nice|1
-            #     2|col|colour|yellow|ugly|2
-            #     3|co|colour|green|awesome|1
-            #     4|co|cold|||1
-            #     5|conspirac|conspiracy|||5
-            #     6|conspi|conspiracy|||1
-            #     7|c|conspiracy|||1
             results_uni = self.database.execute(sqlstr, sqlargs).fetchall()
-            # Then the result returned by .fetchall() is:
-            #
-            # [('colour', 4), ('cold', 1), ('conspiracy', 6)]
-            #
-            # (“c|conspiracy|1” is not selected because it doesn’t
-            # match the user input “LIKE co%”! I.e. this is filtered
-            # out by the VIEW created above already)
         except Exception: # pylint: disable=broad-except
             LOGGER.exception(
                 'Unexpected error getting “unigram” data from user_db')
@@ -687,11 +735,8 @@ class TabSqliteDb:
             # If no unigrams matched, bigrams and trigrams cannot
             # match either. We can stop here and return what we got
             # from hunspell.
-            return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
+            return self._rank_and_finalize_candidates(phrase_frequencies, input_phrase, title_case)
         # Now normalize the unigram frequencies with the total count
-        # (which is 11 in the above example), which gives us the
-        # normalized result:
-        # [('colour', 4/11), ('cold', 1/11), ('conspiracy', 6/11)]
         sqlstr = 'SELECT sum(user_freq) FROM like_input_phrase_view;'
         try:
             count = self.database.execute(sqlstr, sqlargs).fetchall()[0][0]
@@ -699,9 +744,6 @@ class TabSqliteDb:
             LOGGER.exception(
                 'Unexpected error getting total unigram count '
                 'from user_db')
-        # Updating the phrase_frequency dictionary with the normalized
-        # results gives: {'conspiracy': 6/11, 'code': 0,
-        # 'communicability': 0, 'cold': 1/11, 'colour': 4/11}
         for result_uni in results_uni:
             phrase_frequencies.update(
                 [(result_uni[0], result_uni[1]/float(count))])
@@ -712,7 +754,7 @@ class TabSqliteDb:
         if not p_phrase:
             # If no context for bigram matching is available, return
             # what we have so far:
-            return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
+            return self._rank_and_finalize_candidates(phrase_frequencies, input_phrase, title_case)
         sqlstr = (
             'SELECT phrase, sum(user_freq) FROM like_input_phrase_view '
             'WHERE p_phrase = :p_phrase GROUP BY phrase;')
@@ -724,7 +766,7 @@ class TabSqliteDb:
                 'from user_db')
         if not results_bi:
             # If no bigram could be matched, return what we have so far:
-            return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
+            return self._rank_and_finalize_candidates(phrase_frequencies, input_phrase, title_case)
         # get the total count of p_phrase to normalize the bigram frequencies:
         sqlstr = (
             'SELECT sum(user_freq) FROM like_input_phrase_view '
@@ -751,7 +793,7 @@ class TabSqliteDb:
         if not pp_phrase:
             # If no context for trigram matching is available, return
             # what we have so far:
-            return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
+            return self._rank_and_finalize_candidates(phrase_frequencies, input_phrase, title_case)
         sqlstr = ('SELECT phrase, sum(user_freq) FROM like_input_phrase_view '
                   'WHERE p_phrase = :p_phrase '
                   'AND pp_phrase = :pp_phrase GROUP BY phrase;')
@@ -763,7 +805,7 @@ class TabSqliteDb:
                 'from user_db')
         if not results_tri:
             # if no trigram could be matched, return what we have so far:
-            return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
+            return self._rank_and_finalize_candidates(phrase_frequencies, input_phrase, title_case)
         # get the total count of (p_phrase, pp_phrase) pairs to
         # normalize the bigram frequencies:
         sqlstr = (
@@ -785,12 +827,13 @@ class TabSqliteDb:
             phrase_frequencies.update(
                 [(result_tri[0],
                   0.5*result_tri[1]/float(count_pp_phrase_p_phrase)
-                  +0.5*phrase_frequencies[result_tri[0]])])
+                  +0.5*phrase_frequencies.get(result_tri[0], 0.0))])
+
         if DEBUG_LEVEL > 1:
             LOGGER.debug(
                 'Trigram best_candidates=%s',
                 itb_util_core.best_candidates(phrase_frequencies, title=title_case))
-        return itb_util_core.best_candidates(phrase_frequencies, title=title_case)
+        return self._rank_and_finalize_candidates(phrase_frequencies, input_phrase, title_case)
 
     def generate_userdb_desc(self) -> bool:
         '''
