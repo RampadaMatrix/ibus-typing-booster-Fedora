@@ -2121,6 +2121,8 @@ class TypingBoosterEngine(IBus.Engine):
                         comment='',
                         from_user_db=cand.user_freq > 0,
                         spell_checking=cand.user_freq < 0))
+        # Limit candidates to page_size so that no '< >' paging controls are shown
+        self._candidates = self._candidates[:self._page_size]
         for cand in self._candidates:
             self._append_candidate_to_lookup_table(
                 phrase=cand.phrase,
@@ -3348,6 +3350,7 @@ class TypingBoosterEngine(IBus.Engine):
                                    ''.join(itb_util_core.ANTHY_HENKAN_WIDE), '')
             aux_string += ' '
         if (self._show_raw_input >= 1  # Show when there are candidates
+            and self._current_imes[0] != 'NoIME'
             and self._lookup_table.state == LookupTableState.NORMAL):
             aux_string += f'{self._raw_input_representation()} '
         if self._show_number_of_candidates:
@@ -3657,7 +3660,7 @@ class TypingBoosterEngine(IBus.Engine):
                 comment='',
                 from_user_db=True,
                 spell_checking=False)
-            for cand in phrase_candidates]
+            for cand in phrase_candidates][:self._page_size]
         for cand in self._candidates:
             self._append_candidate_to_lookup_table(
                 phrase=cand.phrase,
